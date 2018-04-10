@@ -13,7 +13,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import adapters.ChatListViewAdapter;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -47,6 +51,35 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // List
+        final String[] userArray = {"Jorge", "Adrián", "Bob",
+                                "Alice", "Claire", "Peter",
+                                "John"};
+        final String[] infoArray = {"Programmer", "Programmer", "User",
+                                "User", "Hacker", "Pirate",
+                                "Corsair"};
+        Integer[] imageArray = {R.drawable.man_96, R.drawable.man_96, R.drawable.man_96,
+                                R.drawable.woman_80, R.drawable.woman_80, R.drawable.man_96,
+                                R.drawable.man_96};
+
+        ListView listView;
+        ChatListViewAdapter listAdapter = new ChatListViewAdapter(this, userArray, infoArray, imageArray);
+        listView = (ListView) findViewById(R.id.chatListView);
+        listView.setAdapter(listAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, list_activity.class);
+                String user = userArray[position];
+                String info = infoArray[position];
+                intent.putExtra("user", user);
+                intent.putExtra("info", info);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override
