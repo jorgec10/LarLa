@@ -127,6 +127,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_settings) {
             // ToDo
             Toast.makeText(this, "App settings", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_map){
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_share) {
             // ToDo
             Toast.makeText(this, "Share app URL via other apps", Toast.LENGTH_SHORT).show();
