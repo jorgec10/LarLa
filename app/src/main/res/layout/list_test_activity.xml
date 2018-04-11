@@ -13,7 +13,8 @@
         android:id="@+id/chat_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        chatview:backgroundColor=""
+        chatview:bubbleBackgroundRcv="#FFFFFF"
+        chatview:bubbleElevation="elevated"
     />
 
 </android.support.constraint.ConstraintLayout>

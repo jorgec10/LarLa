@@ -389,7 +389,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
 
-            if (true) {
+            if (success) {
                 Toast.makeText(getApplicationContext(), "Logged in", Toast.LENGTH_SHORT);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 intent.putExtra("User", mEmailView.getText().toString());
