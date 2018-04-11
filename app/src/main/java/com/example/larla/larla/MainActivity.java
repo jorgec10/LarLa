@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, list_activity.class);
+                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
                 String user = userArray[position];
                 String info = infoArray[position];
                 intent.putExtra("user", user);
