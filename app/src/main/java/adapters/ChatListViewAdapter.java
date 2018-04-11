@@ -33,18 +33,21 @@ public class ChatListViewAdapter extends ArrayAdapter {
 
     public View getView(int position, View view, ViewGroup parent) {
 
-        LayoutInflater inflater=context.getLayoutInflater();
-        View rowView=inflater.inflate(R.layout.chat_listview_row, null,true);
+        View rowView = view;
+        if (view == null) {
+            LayoutInflater inflater=context.getLayoutInflater();
+            rowView=inflater.inflate(R.layout.chat_listview_row, parent,false);
 
-        //this code gets references to objects in the chat_listview_row.xml file
-        TextView nameTextField = (TextView) rowView.findViewById(R.id.userTextView);
-        TextView infoTextField = (TextView) rowView.findViewById(R.id.infoTextView);
-        ImageView imageView = (ImageView) rowView.findViewById(R.id.chatImageView);
+            //this code gets references to objects in the chat_listview_row.xml file
+            TextView nameTextField = (TextView) rowView.findViewById(R.id.userTextView);
+            TextView infoTextField = (TextView) rowView.findViewById(R.id.infoTextView);
+            ImageView imageView = (ImageView) rowView.findViewById(R.id.chatImageView);
 
-        //this code sets the values of the objects to values from the arrays
-        nameTextField.setText(userArray[position]);
-        infoTextField.setText(infoArray[position]);
-        imageView.setImageResource(imageIDarray[position]);
+            //this code sets the values of the objects to values from the arrays
+            nameTextField.setText(userArray[position]);
+            infoTextField.setText(infoArray[position]);
+            imageView.setImageResource(imageIDarray[position]);
+        }
 
         return rowView;
 
