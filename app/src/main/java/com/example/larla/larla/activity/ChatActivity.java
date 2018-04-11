@@ -1,8 +1,10 @@
-package com.example.larla.larla;
+package com.example.larla.larla.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
+
+import com.example.larla.larla.R;
 
 import co.intentservice.chatui.ChatView;
 import co.intentservice.chatui.models.ChatMessage;

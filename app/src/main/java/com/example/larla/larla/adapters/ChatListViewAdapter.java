@@ -1,4 +1,4 @@
-package adapters;
+package com.example.larla.larla.adapters;
 
 import android.app.Activity;
 import android.view.LayoutInflater;

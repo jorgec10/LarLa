@@ -1,4 +1,4 @@
-package com.example.larla.larla;
+package com.example.larla.larla.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,7 +17,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import adapters.ChatListViewAdapter;
+import com.example.larla.larla.R;
+import com.example.larla.larla.adapters.ChatListViewAdapter;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
