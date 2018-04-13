@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,7 +34,18 @@ import android.widget.Toast;
 
 import com.example.larla.larla.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.matrix.androidsdk.HomeServerConnectionConfig;
+import org.matrix.androidsdk.MXDataHandler;
+import org.matrix.androidsdk.MXSession;
+import org.matrix.androidsdk.data.store.MXFileStore;
+import org.matrix.androidsdk.rest.model.login.Credentials;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -102,6 +114,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+
     }
 
     private void populateAutoComplete() {
@@ -344,6 +358,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 int response = conn.getResponseCode();
 
                 if (response == 200) {
+
+                    InputStream is = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                    StringBuilder responseStringBuilder = new StringBuilder();
+
+                    String inputStr;
+                    while((inputStr = reader.readLine()) != null) {
+                        responseStringBuilder.append(inputStr);
+                    }
+
+                    JSONObject jsonResponse = new JSONObject(responseStringBuilder.toString());
+
+                    Credentials cred = new Credentials();
+                    cred.homeServer = jsonResponse.getString("home_server");
+                    cred.userId = jsonResponse.getString("user_id");
+                    cred.accessToken = jsonResponse.getString("access_token");
+                    cred.deviceId = jsonResponse.getString("device_id");
+
+                    HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig(Uri.parse("https://matrix.org"), cred);
+                    MXSession session = new MXSession(hsConfig, new MXDataHandler(new MXFileStore(hsConfig, getApplicationContext()), cred), getApplicationContext());
+
+
+                    Log.v("CRED", cred.accessToken);
                     return true;
                 } else {
                     return false;
@@ -355,8 +392,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (JSONException e) {
+                //e.printStackTrace();
             }
-
 
 //            try {
 //                // Simulate network access.
