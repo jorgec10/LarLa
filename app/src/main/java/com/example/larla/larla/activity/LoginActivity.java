@@ -3,24 +3,21 @@ package com.example.larla.larla.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,25 +29,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.larla.larla.Matrix;
 import com.example.larla.larla.R;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.matrix.androidsdk.HomeServerConnectionConfig;
-import org.matrix.androidsdk.MXDataHandler;
-import org.matrix.androidsdk.MXSession;
-import org.matrix.androidsdk.data.store.MXFileStore;
-import org.matrix.androidsdk.rest.model.login.Credentials;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -332,69 +313,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
-            try {
-                URL url = new URL("https://matrix.org/_matrix/client/r0/login");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000 /* milliseconds */);
-                conn.setConnectTimeout(15000 /* milliseconds */);
-                conn.setRequestMethod("GET");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                // Starts the query
-                conn.connect();
-
-                OutputStream os = conn.getOutputStream();
-
-                String body = "{\n" +
-                        "  \"initial_device_display_name\": \"LarLa\",\n" +
-                        "  \"password\": \"" + mPassword + "\",\n" +
-                        "  \"type\": \"m.login.password\",\n" +
-                        "  \"user\": \"" + mEmail + "\"\n" +
-                        "}";
-                os.write(body.getBytes());
-
-                int response = conn.getResponseCode();
-
-                if (response == 200) {
-
-                    InputStream is = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                    StringBuilder responseStringBuilder = new StringBuilder();
-
-                    String inputStr;
-                    while((inputStr = reader.readLine()) != null) {
-                        responseStringBuilder.append(inputStr);
-                    }
-
-                    JSONObject jsonResponse = new JSONObject(responseStringBuilder.toString());
-
-                    Credentials cred = new Credentials();
-                    cred.homeServer = jsonResponse.getString("home_server");
-                    cred.userId = jsonResponse.getString("user_id");
-                    cred.accessToken = jsonResponse.getString("access_token");
-                    cred.deviceId = jsonResponse.getString("device_id");
-
-                    HomeServerConnectionConfig hsConfig = new HomeServerConnectionConfig(Uri.parse("https://matrix.org"), cred);
-                    MXSession session = new MXSession(hsConfig, new MXDataHandler(new MXFileStore(hsConfig, getApplicationContext()), cred), getApplicationContext());
-
-
-                    Log.v("CRED", cred.accessToken);
-                    return true;
-                } else {
-                    return false;
-                }
-
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                //e.printStackTrace();
-            }
+            return Matrix.getInstance(getApplicationContext()).login(mEmail, mPassword);
 
 //            try {
 //                // Simulate network access.
@@ -412,7 +331,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //            }
 
             // TODO: register the new account here.
-            return true;
         }
 
         @Override
