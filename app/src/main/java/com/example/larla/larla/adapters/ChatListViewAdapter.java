@@ -1,6 +1,7 @@
 package com.example.larla.larla.adapters;
 
 import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,33 +10,26 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.larla.larla.R;
+import com.example.larla.larla.models.Chat;
 
-public class ChatListViewAdapter extends ArrayAdapter {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-    //to reference the Activity
-    private final Activity context;
+public class ChatListViewAdapter extends ArrayAdapter<Chat> {
 
-    private final Integer[] imageIDarray;
-    private final String[] userArray;
-    private final String[] infoArray;
+    public ChatListViewAdapter(Activity context, ArrayList<Chat> chats){
 
-
-    public ChatListViewAdapter(Activity context, String[] userArrayParam, String[] infoArrayParam, Integer[] imageIDArrayParam){
-
-        super(context, R.layout.chat_listview_row , userArrayParam);
-
-        this.context = context;
-        this.imageIDarray = imageIDArrayParam;
-        this.userArray = userArrayParam;
-        this.infoArray = infoArrayParam;
-
+        super(context, R.layout.chat_listview_row , chats);
     }
 
     public View getView(int position, View view, ViewGroup parent) {
 
+        Chat chat = getItem(position);
+
         View rowView = view;
         if (view == null) {
-            LayoutInflater inflater=context.getLayoutInflater();
+            LayoutInflater inflater=LayoutInflater.from(getContext());
             rowView=inflater.inflate(R.layout.chat_listview_row, parent,false);
 
             //this code gets references to objects in the chat_listview_row.xml file
@@ -44,14 +38,12 @@ public class ChatListViewAdapter extends ArrayAdapter {
             ImageView imageView = (ImageView) rowView.findViewById(R.id.chatImageView);
 
             //this code sets the values of the objects to values from the arrays
-            nameTextField.setText(userArray[position]);
-            infoTextField.setText(infoArray[position]);
-            imageView.setImageResource(imageIDarray[position]);
+            nameTextField.setText(chat.getName());
+            infoTextField.setText(chat.getInfo());
+            imageView.setImageResource(chat.getImage());
         }
 
         return rowView;
 
     };
-
-
 }

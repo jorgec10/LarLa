@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,8 +18,17 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.larla.larla.Matrix;
 import com.example.larla.larla.R;
 import com.example.larla.larla.adapters.ChatListViewAdapter;
+import com.example.larla.larla.models.Chat;
+
+import org.matrix.androidsdk.MXSession;
+import org.matrix.androidsdk.data.RoomSummary;
+import org.matrix.androidsdk.listeners.MXEventListener;
+import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -53,28 +63,28 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // List
-        final String[] userArray = {"Jorge", "Adrián", "Bob",
-                                "Alice", "Claire", "Peter",
-                                "John"};
-        final String[] infoArray = {"Programmer", "Programmer", "User",
-                                "User", "Hacker", "Pirate",
-                                "Corsair"};
-        Integer[] imageArray = {R.drawable.man_96, R.drawable.man_96, R.drawable.man_96,
-                                R.drawable.woman_80, R.drawable.woman_80, R.drawable.man_96,
-                                R.drawable.man_96};
-
         ListView listView;
-        ChatListViewAdapter listAdapter = new ChatListViewAdapter(this, userArray, infoArray, imageArray);
+        final ChatListViewAdapter listAdapter = new ChatListViewAdapter(this, new ArrayList<Chat>());
         listView = (ListView) findViewById(R.id.chatListView);
         listView.setAdapter(listAdapter);
+
+        final MXSession session = Matrix.getInstance(getApplicationContext()).getSession();
+        session.getDataHandler().addListener(new MXEventListener() {
+            @Override
+            public void onInitialSyncComplete(String toToken) {
+
+                for (RoomSummary s : session.getDataHandler().getStore().getSummaries()) {
+                    listAdapter.add(new Chat(s.getRoomName(), "MATRIX", R.drawable.man_96));
+                }
+            }
+        });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-                String user = userArray[position];
-                String info = infoArray[position];
+                String user = listAdapter.getItem(position).getName();
+                String info = listAdapter.getItem(position).getInfo();
                 intent.putExtra("user", user);
                 intent.putExtra("info", info);
                 startActivity(intent);

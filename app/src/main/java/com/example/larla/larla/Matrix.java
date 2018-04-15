@@ -2,7 +2,6 @@ package com.example.larla.larla;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -119,4 +118,7 @@ public class Matrix {
 
     }
 
+    public MXSession getSession() {
+        return session;
+    }
 }
