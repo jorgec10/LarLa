@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.larla.larla.Matrix;
@@ -26,7 +26,6 @@ import com.example.larla.larla.models.Chat;
 import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.data.RoomSummary;
 import org.matrix.androidsdk.listeners.MXEventListener;
-import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 
 import java.util.ArrayList;
 
@@ -40,10 +39,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Get info from intent
-        String b = this.getIntent().getStringExtra("User");
-
-        Toast.makeText(this, "Welcome " + b, Toast.LENGTH_LONG).show();
+        String userName = this.getIntent().getStringExtra("userName");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +57,11 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View headView = navigationView.getHeaderView(0);
+        TextView textNavBar = (TextView) headView.findViewById(R.id.textViewNavBarUser);
+        textNavBar.setText(userName);
         navigationView.setNavigationItemSelectedListener(this);
+
 
         ListView listView;
         final ChatListViewAdapter listAdapter = new ChatListViewAdapter(this, new ArrayList<Chat>());
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
             public void onInitialSyncComplete(String toToken) {
 
                 for (RoomSummary s : session.getDataHandler().getStore().getSummaries()) {
-                    listAdapter.add(new Chat(s.getRoomName(), "MATRIX", R.drawable.man_96));
+                    listAdapter.add(new Chat(s.getRoomName(), "MATRIX", R.drawable.man_96, s.getRoomId()));
                 }
             }
         });
@@ -83,10 +83,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-                String user = listAdapter.getItem(position).getName();
-                String info = listAdapter.getItem(position).getInfo();
-                intent.putExtra("user", user);
-                intent.putExtra("info", info);
+                String roomId = listAdapter.getItem(position).getRoomId();
+                intent.putExtra("roomId", roomId);
                 startActivity(intent);
             }
         });
