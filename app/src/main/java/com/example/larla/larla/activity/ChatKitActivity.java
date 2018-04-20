@@ -1,5 +1,6 @@
 package com.example.larla.larla.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
@@ -38,6 +40,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.example.larla.larla.activity.MainActivity.hasPermissions;
+
 public class ChatKitActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE = 100;
@@ -49,6 +53,17 @@ public class ChatKitActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_kit_activity);
+
+        // Check permissions
+        int PERMISSION_ALL = 1;
+        String[] permissions = {Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA};
+
+        if(!hasPermissions(this, permissions)){
+            ActivityCompat.requestPermissions(this, permissions, PERMISSION_ALL);
+        }
 
         // Get session, room and user info
         final String roomId = this.getIntent().getStringExtra("roomId");
@@ -119,9 +134,12 @@ public class ChatKitActivity extends AppCompatActivity {
                                 startActivityForResult(videoIntent, REQUEST_VIDEO);
                                 break;
                             case 2: // Audio
-
+                                Intent audioIntent = new Intent(ChatKitActivity.this, AudioActivity.class);
+                                startActivity(audioIntent);
                                 break;
                             case 3: // Location
+                                Intent mapsIntent = new Intent(ChatKitActivity.this, MapsActivity.class);
+                                startActivity(mapsIntent);
                                 break;
                         }
                     }
