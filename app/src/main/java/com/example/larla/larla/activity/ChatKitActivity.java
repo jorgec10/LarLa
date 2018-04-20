@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import com.example.larla.larla.Matrix;
 import com.example.larla.larla.R;
+import com.example.larla.larla.fragments.LarlaMessageListFragment;
 import com.example.larla.larla.models.Author;
 import com.example.larla.larla.models.Message;
 import com.stfalcon.chatkit.messages.MessageInput;
@@ -23,9 +24,6 @@ import java.util.List;
 
 public class ChatKitActivity extends AppCompatActivity {
 
-    private MessagesList messagesList;
-    protected MessagesListAdapter<Message> messagesAdapter;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,31 +36,14 @@ public class ChatKitActivity extends AppCompatActivity {
         String matrixUser = session.getDataHandler().getUser(matrixUserId).displayname;
         final Author userAuthor = new Author(matrixUser, matrixUser, "avatar");
 
-        // Start adapter
-        this.messagesList = (MessagesList) findViewById(R.id.messagesList);
-        messagesAdapter = new MessagesListAdapter<>(matrixUser, null);
-        this.messagesList.setAdapter(messagesAdapter);
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        LarlaMessageListFragment fragment = (LarlaMessageListFragment) fm.findFragmentByTag("FRAGMENT");
 
-        // Get room messages
-        session.getRoomsApiClient().initialSync(roomId, new SimpleApiCallback<RoomResponse>(){
-            @Override
-            public void onSuccess(RoomResponse info) {
-                super.onSuccess(info);
-                List<Message> messages = new LinkedList<>();
-                for (Event e: info.messages.chunk) {
-                    if (e.type.equals(Event.EVENT_TYPE_MESSAGE)) {
-                        Message msg;
-                        String content = e.getContentAsJsonObject().get("body").getAsString();
-                        String eventUser = session.getDataHandler().getUser(e.getSender()).displayname;
-
-                        Author eventAuthor = new Author(eventUser, eventUser, "avatar");
-                        msg = new Message("1", content, eventAuthor, new Date(System.currentTimeMillis()));
-                        messages.add(msg);
-                    }
-                }
-                messagesAdapter.addToEnd(messages, true);
-            }
-        });
+        if (fragment == null) {
+            // this fragment displays messages and handles all message logic
+            fragment = LarlaMessageListFragment.newInstance(session.getMyUserId(), roomId, org.matrix.androidsdk.R.layout.fragment_matrix_message_list_fragment);
+            fm.beginTransaction().add(R.id.chat_view, fragment, "FRAGMENT").commit();
+        }
 
         // User messages input
         MessageInput messageInput = findViewById(R.id.input);
@@ -72,7 +53,6 @@ public class ChatKitActivity extends AppCompatActivity {
                 //validate and send message
                 Message message = new Message("1", input.toString(), userAuthor, new Date(System.currentTimeMillis()));
                 session.getDataHandler().getRoom(roomId).sendTextMessage(message.getText(), null, null, null);
-                messagesAdapter.addToStart(message, true);
                 return true;
             }
         });
@@ -84,7 +64,6 @@ public class ChatKitActivity extends AppCompatActivity {
                 Toast.makeText(ChatKitActivity.this, "Media was attached", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
 }
