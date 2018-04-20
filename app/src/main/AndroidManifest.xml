@@ -44,6 +44,10 @@
         <activity android:name=".activity.MapsActivity" />
         <activity android:name=".activity.ChatKitActivity" />
         <activity android:name=".activity.AudioActivity" />
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAlYYkjnhWi4-rVLwPbBI4S26ABM-De6_Q"/>
     </application>
 
 </manifest>
