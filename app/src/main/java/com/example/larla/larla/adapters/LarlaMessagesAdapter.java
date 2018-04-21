@@ -1,11 +1,13 @@
 package com.example.larla.larla.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.larla.larla.R;
@@ -17,6 +19,7 @@ import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.rest.model.RoomMember;
 import org.matrix.androidsdk.util.JsonUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -202,15 +205,10 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return getTextView(position, convertView, parent);
-    }
-
-    protected View getTextView(final int position, View convertView, ViewGroup parent) {
-
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_text, parent, false);
         }
-            // GA Crash
+        // GA Crash
         if (position >= getCount()) {
             return convertView;
         }
@@ -222,36 +220,50 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
         if (event.eventId != null) {
 
             synchronized (this) {
-                if (event.type.equals(Event.EVENT_TYPE_MESSAGE)) {
-
-                    if (event.getSender() != null) {
-
-                        if (event.getSender().equals(session.getMyUserId())) {
-                            convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_text_send, parent, false);
-                        } else {
-                            convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_text, parent, false);
-                        }
-
-                        TextView nameTextField = (TextView) convertView.findViewById(R.id.text_message_name);
-                        TextView infoTextField = (TextView) convertView.findViewById(R.id.text_message_body);
-                        TextView timeTextField = (TextView) convertView.findViewById(R.id.text_message_time);
-
-                        if (nameTextField != null) {
-                            nameTextField.setText(session.getDataHandler().getUser(event.getSender()).displayname != null ? session.getDataHandler().getUser(event.getSender()).displayname : event.getSender());
-                        }
-                        if (infoTextField != null) {
-                            infoTextField.setText(JsonUtils.toMessage(event.getContent()).body);
-                        }
-                        if (timeTextField != null) {
-                            Date date = new Date(event.getOriginServerTs());
-                            timeTextField.setText(date.getHours() + ":" + date.getMinutes());
-                        }
-                    }
+                switch (event.type) {
+                    case Event.EVENT_TYPE_MESSAGE:
+                        return getTextView(position,convertView,parent);
+                    default:
+                        return convertView;
                 }
-
             }
         }
+        return convertView;
+    }
 
+    protected View getTextView(final int position, View convertView, ViewGroup parent) {
+        MessageRow row = getItem(position);
+        Event event = row.getEvent();
+
+        if (event.getSender() != null) {
+
+            if (event.getSender().equals(session.getMyUserId())) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_text_send, parent, false);
+            } else {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_text, parent, false);
+            }
+
+            TextView nameTextField = (TextView) convertView.findViewById(R.id.text_message_name);
+            TextView infoTextField = (TextView) convertView.findViewById(R.id.text_message_body);
+            TextView timeTextField = (TextView) convertView.findViewById(R.id.text_message_time);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_message_profile);
+
+            String url = session.getDataHandler().getUser(event.getSender()).avatar_url;
+            if (url != null && imageView != null) {
+                session.getMediasCache().loadAvatarThumbnail(session.getHomeServerConfig(), imageView, url,32);
+            }
+
+            if (nameTextField != null) {
+                nameTextField.setText(session.getDataHandler().getUser(event.getSender()).displayname != null ? session.getDataHandler().getUser(event.getSender()).displayname : event.getSender());
+            }
+            if (infoTextField != null) {
+                infoTextField.setText(JsonUtils.toMessage(event.getContent()).body);
+            }
+            if (timeTextField != null) {
+                Date date = new Date(event.getOriginServerTs());
+                timeTextField.setText(new SimpleDateFormat("HH:MM").format(date));
+            }
+        }
 
         return convertView;
     }

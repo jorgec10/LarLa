@@ -13,10 +13,10 @@
         android:id="@+id/image_message_profile"
         android:layout_width="32dp"
         android:layout_height="32dp"
+        android:background="@drawable/man_96"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="parent" />
-        <!--android:background="@drawable/circle"-->
 
 
     <TextView
