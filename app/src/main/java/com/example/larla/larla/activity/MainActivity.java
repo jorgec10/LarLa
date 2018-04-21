@@ -1,12 +1,20 @@
 package com.example.larla.larla.activity;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,13 +35,21 @@ import com.example.larla.larla.adapters.ChatListViewAdapter;
 import com.example.larla.larla.models.Chat;
 
 import org.matrix.androidsdk.MXSession;
+import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.data.RoomSummary;
 import org.matrix.androidsdk.listeners.MXEventListener;
+import org.matrix.androidsdk.rest.model.Event;
+import org.matrix.androidsdk.util.JsonUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static final String CHANNEL_ID = "com.example.larla.MESSAGES";
+    public static final String CHANNEL_NAME = "Mensajes";
+
 
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
@@ -77,6 +93,22 @@ public class MainActivity extends AppCompatActivity
         textNavBar.setText(userName);
         navigationView.setNavigationItemSelectedListener(this);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create the NotificationChannel, but only on API 26+ because
+            // the NotificationChannel class is new and not in the support library
+
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,
+                    CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
+
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.RED);
+            notificationChannel.setShowBadge(true);
+            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel);
+
+        }
 
         ListView listView;
         final ChatListViewAdapter listAdapter = new ChatListViewAdapter(this, new ArrayList<Chat>());
@@ -90,6 +122,26 @@ public class MainActivity extends AppCompatActivity
 
                 for (RoomSummary s : session.getDataHandler().getStore().getSummaries()) {
                     listAdapter.add(new Chat(s.getRoomName(), "MATRIX", R.drawable.man_96, s.getRoomId()));
+                }
+            }
+
+            @Override
+            public void onLiveEvent(Event event, RoomState roomState) {
+                if (session.getDataHandler().isInitialSyncComplete()) {
+
+                    if (event.type.equals(Event.EVENT_TYPE_MESSAGE)) {
+                        NotificationCompat.Builder mBuilder =
+                                new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
+                                        .setSmallIcon(R.mipmap.ic_launcher)
+                                        .setStyle(new NotificationCompat.MessagingStyle(session.getMyUser().displayname)
+                                                .setConversationTitle(roomState.name)
+                                                .addMessage(JsonUtils.toMessage(event.getContent()).body, event.getOriginServerTs(), session.getDataHandler().getUser(event.getSender()).displayname));
+
+                        NotificationManager mNotificationManager =
+                                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                        mNotificationManager.notify(event.hashCode(), mBuilder.build());
+                    }
                 }
             }
         });
