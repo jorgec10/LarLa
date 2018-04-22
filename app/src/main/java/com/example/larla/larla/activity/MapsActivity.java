@@ -2,6 +2,8 @@ package com.example.larla.larla.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
@@ -63,6 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapLongClick(LatLng latLng) {
 
+                final LatLng loc = latLng;
                 // Create a marker
                 MarkerOptions markerOptions = new MarkerOptions();
                 // Set position
@@ -75,14 +78,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Add marker
                 mMap.addMarker(markerOptions);
 
-                Intent intent = new Intent();
-                intent.putExtra("lat", Double.toString(latLng.latitude));
-                intent.putExtra("long", Double.toString(latLng.longitude));
-                setResult(Activity.RESULT_OK, intent);
-                finish();
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                Intent intent = new Intent();
+                                intent.putExtra("lat", Double.toString(loc.latitude));
+                                intent.putExtra("long", Double.toString(loc.longitude));
+                                setResult(Activity.RESULT_OK, intent);
+                                finish();
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                // Do nothing
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                builder.setMessage("Do you want to send this location?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
+
+
 
             }
         });
 
     }
+
+
+
+
 }
