@@ -46,8 +46,11 @@ public class ChatKitActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE = 100;
     private static final int REQUEST_VIDEO = 101;
+    private static final int REQUEST_LOCATION = 102;
     File destination;
     ImageView imageView;
+    MXSession session;
+    String roomId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,15 +62,17 @@ public class ChatKitActivity extends AppCompatActivity {
         String[] permissions = {Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA};
+                Manifest.permission.CAMERA,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION};
 
         if(!hasPermissions(this, permissions)){
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_ALL);
         }
 
         // Get session, room and user info
-        final String roomId = this.getIntent().getStringExtra("roomId");
-        final MXSession session = Matrix.getInstance(getApplicationContext()).getSession();
+        roomId = this.getIntent().getStringExtra("roomId");
+        session = Matrix.getInstance(getApplicationContext()).getSession();
         String matrixUserId = session.getDataHandler().getUserId();
         String matrixUser = session.getDataHandler().getUser(matrixUserId).displayname;
         final Author userAuthor = new Author(matrixUser, matrixUser, "avatar");
@@ -139,7 +144,7 @@ public class ChatKitActivity extends AppCompatActivity {
                                 break;
                             case 3: // Location
                                 Intent mapsIntent = new Intent(ChatKitActivity.this, MapsActivity.class);
-                                startActivity(mapsIntent);
+                                startActivityForResult(mapsIntent, REQUEST_LOCATION);
                                 break;
                         }
                     }
@@ -165,8 +170,15 @@ public class ChatKitActivity extends AppCompatActivity {
             }
 
         }
+
         else if(requestCode == REQUEST_VIDEO && resultCode == Activity.RESULT_OK) {
             Toast.makeText(this, "Video", Toast.LENGTH_SHORT).show();
+        }
+
+        else if(requestCode == REQUEST_LOCATION && resultCode == Activity.RESULT_OK) {
+            String location = data.getStringExtra("lat") + " : " + data.getStringExtra("long");
+            //Toast.makeText(this, data.getStringExtra("lat") + " : " + data.getStringExtra("long"), Toast.LENGTH_SHORT).show();
+            session.getDataHandler().getRoom(roomId).sendTextMessage(location, null, null, null);
         }
     };
 
