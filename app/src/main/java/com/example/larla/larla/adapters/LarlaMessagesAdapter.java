@@ -15,8 +15,10 @@ import com.example.larla.larla.R;
 import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.adapters.AbstractMessagesAdapter;
 import org.matrix.androidsdk.adapters.MessageRow;
+import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.rest.model.RoomMember;
+import org.matrix.androidsdk.rest.model.message.Message;
 import org.matrix.androidsdk.util.JsonUtils;
 
 import java.text.SimpleDateFormat;
@@ -38,9 +40,15 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
 
     @Override
     public void add(MessageRow messageRow, boolean b) {
-        super.add(messageRow);
-        if (messageRow.getEvent().eventId != null) {
-            eventos.put(messageRow.getEvent().eventId, messageRow);
+        if (isSupportedRow(messageRow)) {
+            if (eventos.containsKey(messageRow.getEvent().eventId)) {
+                eventos.put(messageRow.getEvent().eventId, messageRow);
+            } else {
+                super.add(messageRow);
+                if (messageRow.getEvent().eventId != null) {
+                    eventos.put(messageRow.getEvent().eventId, messageRow);
+                }
+            }
         }
     }
 
@@ -147,6 +155,8 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             // remove the old display
             removeEventById(s);
         }
+
+        notifyDataSetChanged();
     }
 
     @Override
@@ -155,7 +165,10 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
 
         if (row != null) {
             remove(row);
+            eventos.remove(s);
         }
+
+        notifyDataSetChanged();
     }
 
     @Override
@@ -261,7 +274,7 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             }
             if (timeTextField != null) {
                 Date date = new Date(event.getOriginServerTs());
-                timeTextField.setText(new SimpleDateFormat("HH:MM").format(date));
+                timeTextField.setText(new SimpleDateFormat("HH:mm").format(date));
             }
         }
 
@@ -270,10 +283,11 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
 
 
     private boolean isSupportedRow(MessageRow row) {
+        RoomState roomState = row.getRoomState();
         Event event = row.getEvent();
 
         // sanity checks
-        if ((null == event) || (null == event.eventId)) {
+        if ((null == event) || (null == event.eventId) || (null == roomState)) {
             Log.e("Matrix", "## isSupportedRow() : invalid row");
             return false;
         }
@@ -291,9 +305,20 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             } else {
                 Log.e("Matrix", "## isSupportedRow() : the event " + eventId + " has already been received");
             }
-            return false;
+
+            return true;
         }
 
-        return true;
+        String eventType = event.getType();
+
+        if (Event.EVENT_TYPE_MESSAGE.equals(eventType)) {
+            // A message is displayable as long as it has a body
+            // Redacted messages should not be displayed
+            Message message = JsonUtils.toMessage(event.getContent());
+            return !TextUtils.isEmpty(message.body);
+        }
+
+        return false;
     }
+
 }
