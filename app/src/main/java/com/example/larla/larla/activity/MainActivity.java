@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity
                                         .setSmallIcon(R.mipmap.ic_launcher)
                                         .setStyle(new NotificationCompat.MessagingStyle(session.getMyUser().displayname)
                                                 .setConversationTitle(roomState.name)
-                                                .addMessage(JsonUtils.toMessage(event.getContent()).body, event.getOriginServerTs(), session.getDataHandler().getUser(event.getSender()).displayname));
+                                                .addMessage(JsonUtils.toMessage(event.getContent()).body, event.getOriginServerTs(), session.getDataHandler().getUser(event.getSender()).displayname)).setSmallIcon(R.drawable.ic_stat_name).setColor(Color.argb(0, 75, 143, 255)).setColorized(true);
 
                         NotificationManager mNotificationManager =
                                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
