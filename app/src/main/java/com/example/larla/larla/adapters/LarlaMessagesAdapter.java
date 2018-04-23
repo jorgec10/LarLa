@@ -2,6 +2,7 @@ package com.example.larla.larla.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.ExifInterface;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,8 +17,10 @@ import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.adapters.AbstractMessagesAdapter;
 import org.matrix.androidsdk.adapters.MessageRow;
 import org.matrix.androidsdk.data.RoomState;
+import org.matrix.androidsdk.listeners.MXMediaDownloadListener;
 import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.rest.model.RoomMember;
+import org.matrix.androidsdk.rest.model.message.ImageMessage;
 import org.matrix.androidsdk.rest.model.message.Message;
 import org.matrix.androidsdk.util.JsonUtils;
 
@@ -235,12 +238,72 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             synchronized (this) {
                 switch (event.type) {
                     case Event.EVENT_TYPE_MESSAGE:
-                        return getTextView(position,convertView,parent);
+                        Message message = JsonUtils.toMessage(event.getContent());
+                        switch (message.msgtype) {
+                            case Message.MSGTYPE_TEXT:
+                                return getTextView(position,convertView,parent);
+                            case Message.MSGTYPE_IMAGE:
+                                return getImageView(position,convertView,parent);
+                            default:
+                                return convertView;
+                        }
                     default:
                         return convertView;
                 }
             }
         }
+        return convertView;
+    }
+
+    private View getImageView(int position, View convertView, ViewGroup parent) {
+
+        MessageRow row = getItem(position);
+        Event event = row.getEvent();
+
+        if (event.getSender() != null) {
+
+            if (event.getSender().equals(session.getMyUserId())) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_image_send, parent, false);
+            } else {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_image, parent, false);
+            }
+
+            TextView nameTextField = (TextView) convertView.findViewById(R.id.text_message_name);
+            final ImageView imageMessageBody = (ImageView) convertView.findViewById(R.id.image_message_body);
+            TextView timeTextField = (TextView) convertView.findViewById(R.id.text_message_time);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_message_profile);
+
+            String url = session.getDataHandler().getUser(event.getSender()).avatar_url;
+            if (url != null && imageView != null) {
+                session.getMediasCache().loadAvatarThumbnail(session.getHomeServerConfig(), imageView, url,32);
+            }
+
+            if (nameTextField != null) {
+                nameTextField.setText(session.getDataHandler().getUser(event.getSender()).displayname != null ? session.getDataHandler().getUser(event.getSender()).displayname : event.getSender());
+            }
+
+            final ImageMessage message = JsonUtils.toImageMessage(event.getContent());
+            final String urlImageBody = message.getThumbnailUrl();
+            if (url != null && imageMessageBody != null) {
+                Log.d("image", "printing image");
+                if (!session.getMediasCache().isMediaCached(urlImageBody, message.getMimeType())) {
+                    session.getMediasCache().downloadMedia(getContext(), session.getHomeServerConfig(), urlImageBody, message.getMimeType(), message.info.thumbnail_file, new MXMediaDownloadListener() {
+                        @Override
+                        public void onDownloadComplete(String downloadId) {
+                            session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 100,100, message.getRotation(), 0, message.info.thumbnailInfo.mimetype, message.info.thumbnail_file);
+                        }
+                    });
+                } else {
+                    session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 100, 100, message.getRotation(), 0, message.info.thumbnailInfo.mimetype, message.info.thumbnail_file);
+                }
+            }
+
+            if (timeTextField != null) {
+                Date date = new Date(event.getOriginServerTs());
+                timeTextField.setText(new SimpleDateFormat("HH:mm").format(date));
+            }
+        }
+
         return convertView;
     }
 
