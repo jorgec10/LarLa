@@ -1,48 +1,68 @@
 package com.example.larla.larla.models;
 
-public class Chat {
+import android.util.Log;
 
-    private String name;
-    private String info;
-    private Integer image;
-    private String roomId;
+import com.stfalcon.chatkit.commons.models.IDialog;
+import com.stfalcon.chatkit.commons.models.IMessage;
+import com.stfalcon.chatkit.commons.models.IUser;
 
-    public Chat(String username, String info, Integer image, String roomId) {
-        this.name = username;
-        this.info = info;
-        this.image = image;
-        this.roomId = roomId;
+import org.matrix.androidsdk.MXSession;
+import org.matrix.androidsdk.data.RoomState;
+import org.matrix.androidsdk.rest.model.Event;
+import org.matrix.androidsdk.rest.model.RoomMember;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
+public class Chat implements IDialog {
+
+    private MXSession session;
+    private RoomState roomState;
+
+    public Chat(MXSession session, RoomState roomState) {
+        this.session = session;
+        this.roomState = roomState;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public String getId() {
+        return roomState.roomId;
     }
 
-    public void setName(String username) {
-        this.name = username;
+    @Override
+    public String getDialogPhoto() {
+        Log.d("Image", "getDialogPhoto: " + roomState.getAvatarUrl());
+        return roomState.getAvatarUrl();
     }
 
-    public String getInfo() {
-        return info;
+    @Override
+    public String getDialogName() {
+        return roomState.getDisplayName(session.getMyUser().user_id);
     }
 
-    public void setInfo(String info) {
-        this.info = info;
+    @Override
+    public List<? extends IUser> getUsers() {
+        List<Author> users = new LinkedList<Author>();
+        for (RoomMember roomMember : roomState.getMembers()) {
+            users.add(new Author(roomMember));
+        };
+        return users;
     }
 
-    public Integer getImage() {
-        return image;
+    @Override
+    public IMessage getLastMessage() {
+        Event event = session.getDataHandler().getStore().getLatestEvent(roomState.roomId);
+        return new Message(event);
     }
 
-    public void setImage(Integer image) {
-        this.image = image;
+    @Override
+    public void setLastMessage(IMessage message) {
     }
 
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
+    @Override
+    public int getUnreadCount() {
+        return roomState.getNotificationCount();
     }
 }

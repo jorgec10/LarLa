@@ -2,30 +2,28 @@ package com.example.larla.larla.models;
 
 import com.stfalcon.chatkit.commons.models.IUser;
 
+import org.matrix.androidsdk.rest.model.RoomMember;
+
 public class Author implements IUser {
 
-    private String id;
-    private String name;
-    private String avatar;
+    private RoomMember roomMember;
 
-    public Author(String id, String name, String avatar) {
-        this.id = id;
-        this.name = name;
-        this.avatar = avatar;
+    public Author(RoomMember roomMember) {
+        this.roomMember = roomMember;
     }
 
     @Override
     public String getId() {
-        return id;
+        return roomMember.getUserId();
     }
 
     @Override
     public String getName() {
-        return name;
+        return roomMember.getName();
     }
 
     @Override
     public String getAvatar() {
-        return avatar;
+        return roomMember.getAvatarUrl();
     }
 }

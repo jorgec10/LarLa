@@ -75,7 +75,6 @@ public class ChatKitActivity extends AppCompatActivity {
         session = Matrix.getInstance(getApplicationContext()).getSession();
         String matrixUserId = session.getDataHandler().getUserId();
         String matrixUser = session.getDataHandler().getUser(matrixUserId).displayname;
-        final Author userAuthor = new Author(matrixUser, matrixUser, "avatar");
 
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         LarlaMessageListFragment fragment = (LarlaMessageListFragment) fm.findFragmentByTag("FRAGMENT");
@@ -92,8 +91,7 @@ public class ChatKitActivity extends AppCompatActivity {
             @Override
             public boolean onSubmit(CharSequence input) {
                 //validate and send message
-                Message message = new Message("1", input.toString(), userAuthor, new Date(System.currentTimeMillis()));
-                session.getDataHandler().getRoom(roomId).sendTextMessage(message.getText(), null, null, null);
+                session.getDataHandler().getRoom(roomId).sendTextMessage(input.toString(), null, null, null);
                 return true;
             }
         });

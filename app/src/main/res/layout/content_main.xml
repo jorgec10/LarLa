@@ -8,8 +8,8 @@
     tools:context=".activity.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <ListView
+    <com.stfalcon.chatkit.dialogs.DialogsList
         android:id="@+id/chatListView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 </android.support.constraint.ConstraintLayout>

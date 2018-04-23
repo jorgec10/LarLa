@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,7 +14,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -24,31 +24,32 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.larla.larla.Matrix;
 import com.example.larla.larla.R;
-import com.example.larla.larla.adapters.ChatListViewAdapter;
 import com.example.larla.larla.models.Chat;
+import com.stfalcon.chatkit.commons.ImageLoader;
+import com.stfalcon.chatkit.commons.models.IDialog;
+import com.stfalcon.chatkit.dialogs.DialogsList;
+import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 
 import org.matrix.androidsdk.MXSession;
+import org.matrix.androidsdk.data.Room;
 import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.data.RoomSummary;
 import org.matrix.androidsdk.listeners.MXEventListener;
 import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.util.JsonUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String CHANNEL_ID = "com.example.larla.MESSAGES";
     public static final String CHANNEL_NAME = "Mensajes";
+    private MXSession session;
 
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -69,6 +70,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        session = Matrix.getInstance(getApplicationContext()).getSession();
 
         String userName = this.getIntent().getStringExtra("userName");
 
@@ -110,18 +113,29 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        ListView listView;
-        final ChatListViewAdapter listAdapter = new ChatListViewAdapter(this, new ArrayList<Chat>());
-        listView = (ListView) findViewById(R.id.chatListView);
-        listView.setAdapter(listAdapter);
+        final DialogsListAdapter dialogsListAdapter = new DialogsListAdapter<>(new ImageLoader() {
+            @Override
+            public void loadImage(ImageView imageView, String url) {
+                Log.d("Image", "loadImage: loading... " + url);
+                if (imageView != null) {
+                    if(url != null) {
+                        session.getMediasCache().loadAvatarThumbnail(session.getHomeServerConfig(), imageView, url, 10);
+                    } else {
+                        imageView.setImageResource(R.drawable.man_96);
+                    }
+                }
+            }
+        });
+        DialogsList listView = (DialogsList) findViewById(R.id.chatListView);
+        listView.setAdapter(dialogsListAdapter);
 
-        final MXSession session = Matrix.getInstance(getApplicationContext()).getSession();
+
         session.getDataHandler().addListener(new MXEventListener() {
             @Override
             public void onInitialSyncComplete(String toToken) {
 
-                for (RoomSummary s : session.getDataHandler().getStore().getSummaries()) {
-                    listAdapter.add(new Chat(s.getRoomName(), "MATRIX", R.drawable.man_96, s.getRoomId()));
+                for (Room room : session.getDataHandler().getStore().getRooms()) {
+                    dialogsListAdapter.addItem(new Chat(session, room.getState()));
                 }
             }
 
@@ -146,11 +160,11 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onDialogClick(IDialog dialog) {
                 Intent intent = new Intent(MainActivity.this, ChatKitActivity.class);
-                String roomId = listAdapter.getItem(position).getRoomId();
+                String roomId = dialog.getId();
                 intent.putExtra("roomId", roomId);
                 startActivity(intent);
             }
