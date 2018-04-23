@@ -76,6 +76,8 @@ public class ChatKitActivity extends AppCompatActivity {
         String matrixUserId = session.getDataHandler().getUserId();
         String matrixUser = session.getDataHandler().getUser(matrixUserId).displayname;
 
+        setTitle(this.getIntent().getStringExtra("roomName"));
+
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         LarlaMessageListFragment fragment = (LarlaMessageListFragment) fm.findFragmentByTag("FRAGMENT");
 

@@ -68,8 +68,12 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        setTitle("LarLa");
 
         session = Matrix.getInstance(getApplicationContext()).getSession();
 
@@ -165,7 +169,9 @@ public class MainActivity extends AppCompatActivity
             public void onDialogClick(IDialog dialog) {
                 Intent intent = new Intent(MainActivity.this, ChatKitActivity.class);
                 String roomId = dialog.getId();
+                String roomName = dialog.getDialogName();
                 intent.putExtra("roomId", roomId);
+                intent.putExtra("roomName", roomName);
                 startActivity(intent);
             }
         });
@@ -211,14 +217,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_user) {
-            // ToDo
-            Toast.makeText(this, "User info", Toast.LENGTH_SHORT).show();
+            Intent userInfoIntent = new Intent(MainActivity.this, UserInfoActivity.class);
+            startActivity(userInfoIntent);
         } else if (id == R.id.nav_settings) {
             // ToDo
             Toast.makeText(this, "App settings", Toast.LENGTH_SHORT).show();
-        } else if (id == R.id.nav_map){
-            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-            startActivity(intent);
         } else if (id == R.id.nav_share) {
             // ToDo
             Toast.makeText(this, "Share app URL via other apps", Toast.LENGTH_SHORT).show();
