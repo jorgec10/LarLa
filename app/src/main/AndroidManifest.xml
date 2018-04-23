@@ -47,6 +47,8 @@
         <activity android:name=".activity.AudioActivity" />
         <activity android:name=".activity.UserInfoActivity" />
         <activity android:name=".activity.RegisterActivity" />
+        <activity android:name=".activity.NewChatActivity" />
+        <activity android:name=".activity.RoomInfoActivity" />
 
         <meta-data
             android:name="com.google.android.gms.version"
