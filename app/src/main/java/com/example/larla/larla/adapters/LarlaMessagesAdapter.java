@@ -1,15 +1,25 @@
 package com.example.larla.larla.adapters;
 
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.media.ExifInterface;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.larla.larla.R;
 
@@ -18,12 +28,16 @@ import org.matrix.androidsdk.adapters.AbstractMessagesAdapter;
 import org.matrix.androidsdk.adapters.MessageRow;
 import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.listeners.MXMediaDownloadListener;
+import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.rest.model.RoomMember;
+import org.matrix.androidsdk.rest.model.message.AudioMessage;
 import org.matrix.androidsdk.rest.model.message.ImageMessage;
 import org.matrix.androidsdk.rest.model.message.Message;
 import org.matrix.androidsdk.util.JsonUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -244,6 +258,8 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
                                 return getTextView(position,convertView,parent);
                             case Message.MSGTYPE_IMAGE:
                                 return getImageView(position,convertView,parent);
+                            case Message.MSGTYPE_AUDIO:
+                                return getAudioView(position,convertView,parent);
                             default:
                                 return convertView;
                         }
@@ -253,6 +269,95 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             }
         }
         return convertView;
+    }
+
+    private View getAudioView(int position, View convertView, ViewGroup parent) {
+        MessageRow row = getItem(position);
+        final Event event = row.getEvent();
+
+        if (event.getSender() != null) {
+
+            if (event.getSender().equals(session.getMyUserId())) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_audio_send, parent, false);
+            } else {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_audio, parent, false);
+            }
+
+            TextView nameTextField = (TextView) convertView.findViewById(R.id.text_message_name);
+            final Button playButton = (Button) convertView.findViewById(R.id.play_message_body);
+            TextView timeTextField = (TextView) convertView.findViewById(R.id.text_message_time);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_message_profile);
+
+            final String url = session.getDataHandler().getUser(event.getSender()).avatar_url;
+            if (url != null && imageView != null) {
+                session.getMediasCache().loadAvatarThumbnail(session.getHomeServerConfig(), imageView, url,32);
+            }
+
+            if (nameTextField != null) {
+                nameTextField.setText(session.getDataHandler().getUser(event.getSender()).displayname != null ? session.getDataHandler().getUser(event.getSender()).displayname : event.getSender());
+            }
+
+            final AudioMessage message = JsonUtils.toAudioMessage(event.getContent());
+            final String urlAudio = message.getUrl();
+
+            if (urlAudio != null && playButton != null) {
+                playButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        final File file = new File(Environment.getExternalStoragePublicDirectory("Larla/Audios"), "audio"+event.getOriginServerTs());
+                        if (file.exists()) {
+                            playAudio(file, message);
+                        } else {
+
+                            getContext().registerReceiver(new BroadcastReceiver() {
+                                @Override
+                                public void onReceive(Context context, Intent intent) {
+                                    String action = intent.getAction();
+
+                                    if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                                        playAudio(file, message);
+                                    }
+
+                                }
+                            }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+                            String uri = session.getContentManager().getDownloadableUrl(urlAudio);
+                            DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(uri));
+                            request.setDestinationInExternalPublicDir("Larla/Audios", "audio"+event.getOriginServerTs());
+                            request.setMimeType(message.getMimeType());
+                            request.setVisibleInDownloadsUi(false);
+                            manager.enqueue(request);
+
+                        }
+                    }
+                });
+            }
+
+            if (timeTextField != null) {
+                Date date = new Date(event.getOriginServerTs());
+                timeTextField.setText(new SimpleDateFormat("HH:mm").format(date));
+            }
+        }
+
+        return convertView;
+    }
+
+    private void playAudio(File file, AudioMessage message) {
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(file.getAbsolutePath());
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            //Toast.makeText((), "Playing Audio", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        Intent playIntent = new Intent();
+//        playIntent.setAction(android.content.Intent.ACTION_VIEW);
+//        playIntent.setDataAndType(Uri.fromFile(file), message.getMimeType());
+//        getContext().startActivity(playIntent);
     }
 
     private View getImageView(int position, View convertView, ViewGroup parent) {
@@ -284,7 +389,7 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
 
             final ImageMessage message = JsonUtils.toImageMessage(event.getContent());
             final String urlImageBody = message.getThumbnailUrl();
-            if (url != null && imageMessageBody != null) {
+            if (urlImageBody != null && imageMessageBody != null) {
                 Log.d("image", "printing image");
                 if (!session.getMediasCache().isMediaCached(urlImageBody, message.getMimeType())) {
                     session.getMediasCache().downloadMedia(getContext(), session.getHomeServerConfig(), urlImageBody, message.getMimeType(), message.info.thumbnail_file, new MXMediaDownloadListener() {
