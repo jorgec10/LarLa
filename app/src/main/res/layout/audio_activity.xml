@@ -33,4 +33,14 @@
         android:layout_marginTop="10dp"
         android:text="Play"
         android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/upload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/play"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="Upload"
+        android:textSize="20sp" />
 </RelativeLayout>

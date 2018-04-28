@@ -15,6 +15,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -30,6 +31,7 @@ import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import org.matrix.androidsdk.MXSession;
+import org.matrix.androidsdk.data.RoomMediaMessage;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.callback.ToastErrorHandler;
 import org.matrix.androidsdk.rest.model.Event;
@@ -49,10 +51,12 @@ public class ChatKitActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE = 100;
     private static final int REQUEST_VIDEO = 101;
     private static final int REQUEST_LOCATION = 102;
-    File destination;
-    ImageView imageView;
+    public static final int REQUEST_AUDIO = 103;
+
     MXSession session;
     String roomId;
+    private LarlaMessageListFragment fragment;
+    private File destination;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,7 +85,7 @@ public class ChatKitActivity extends AppCompatActivity {
         setTitle(this.getIntent().getStringExtra("roomName"));
 
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-        LarlaMessageListFragment fragment = (LarlaMessageListFragment) fm.findFragmentByTag("FRAGMENT");
+        fragment = (LarlaMessageListFragment) fm.findFragmentByTag("FRAGMENT");
 
         if (fragment == null) {
             // this fragment displays messages and handles all message logic
@@ -115,13 +119,16 @@ public class ChatKitActivity extends AppCompatActivity {
         messageInput.setAttachmentsListener(new MessageInput.AttachmentsListener() {
             @Override
             public void onAddAttachments() {
-
+                
                 final CharSequence options[] = new CharSequence[] {"Photo", "Video", "Audio", "Location"};
                 AlertDialog.Builder builder = new AlertDialog.Builder(ChatKitActivity.this);
                 builder.setTitle("Select attachment");
-                builder.setItems(options, new DialogInterface.OnClickListener() {
+                AlertDialog.Builder builder1 = builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        String url = null;
+
                         switch (which) {
                             case 0: // Photo
                                 Intent imageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -142,7 +149,7 @@ public class ChatKitActivity extends AppCompatActivity {
                                 break;
                             case 2: // Audio
                                 Intent audioIntent = new Intent(ChatKitActivity.this, AudioActivity.class);
-                                startActivity(audioIntent);
+                                startActivityForResult(audioIntent, REQUEST_AUDIO);
                                 break;
                             case 3: // Location
                                 Intent mapsIntent = new Intent(ChatKitActivity.this, MapsActivity.class);
@@ -155,21 +162,16 @@ public class ChatKitActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     @Override
     //Print the image in the Imageview when the Intent to the camera has finished
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_IMAGE && resultCode == Activity.RESULT_OK) {
-            try {
-                FileInputStream in = new FileInputStream(destination);
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 2; //Downsample 2x
-                Bitmap userImage = BitmapFactory.decodeStream(in, null, options);
-                imageView.setImageBitmap(userImage);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            RoomMediaMessage message = new RoomMediaMessage(Uri.fromFile(destination));
+            Log.d("Image", "Message created, sending with type " + message.getMessageType() + " mime " + message.getMimeType(getApplicationContext()));
+            fragment.sendMediaMessage(message);
 
         }
 
@@ -181,6 +183,15 @@ public class ChatKitActivity extends AppCompatActivity {
             String location = data.getStringExtra("lat") + " : " + data.getStringExtra("long");
             //Toast.makeText(this, data.getStringExtra("lat") + " : " + data.getStringExtra("long"), Toast.LENGTH_SHORT).show();
             session.getDataHandler().getRoom(roomId).sendTextMessage(location, null, null, null);
+        }
+
+        else if (requestCode== REQUEST_AUDIO && resultCode == Activity.RESULT_OK) {
+            String url = data.getStringExtra("url");
+            String filename = data.getStringExtra("filename");
+
+            RoomMediaMessage message = new RoomMediaMessage(Uri.parse(url), filename);
+            Log.d("Audio", "Message created, sending with type " + message.getMessageType() + " mime " + message.getMimeType(getApplicationContext()));
+            fragment.sendMediaMessage(message);
         }
     };
 

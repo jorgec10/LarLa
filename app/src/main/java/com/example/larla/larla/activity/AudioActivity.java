@@ -1,24 +1,43 @@
 package com.example.larla.larla.activity;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.larla.larla.Matrix;
 import com.example.larla.larla.R;
 
+import org.matrix.androidsdk.data.RoomMediaMessage;
+import org.matrix.androidsdk.listeners.IMXMediaUploadListener;
+import org.matrix.androidsdk.listeners.MXMediaUploadListener;
+import org.matrix.androidsdk.rest.model.Event;
+import org.matrix.androidsdk.util.ContentUtils;
+import org.matrix.androidsdk.util.EventUtils;
+import org.matrix.androidsdk.util.JsonUtils;
+import org.matrix.androidsdk.util.ResourceUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static com.example.larla.larla.activity.MainActivity.hasPermissions;
 
 public class AudioActivity extends AppCompatActivity {
-    private Button play, stop, record;
+    private Button play, stop, record, upload;
     private MediaRecorder myAudioRecorder;
     private String outputFile;
 
@@ -31,19 +50,20 @@ public class AudioActivity extends AppCompatActivity {
         play = (Button) findViewById(R.id.play);
         stop = (Button) findViewById(R.id.stop);
         record = (Button) findViewById(R.id.record);
+        upload = (Button) findViewById(R.id.upload);
 
         // Disable stop and play buttons while not recording
         stop.setEnabled(false);
         play.setEnabled(false);
 
         // Store the audio file
-        outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/recording.3gp";
+        outputFile = getExternalCacheDir().getAbsolutePath() + "/recording.3gp";
 
         // Define audio specs
         myAudioRecorder = new MediaRecorder();
         myAudioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         myAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        myAudioRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+        myAudioRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_WB);
         myAudioRecorder.setOutputFile(outputFile);
 
         // Recording actions
@@ -91,5 +111,23 @@ public class AudioActivity extends AppCompatActivity {
                 }
             }
         });
+
+        upload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    String url = Matrix.getInstance(getApplicationContext()).getSession().getMediasCache().saveMedia(new FileInputStream(new File(outputFile)), "recording.3gp", "audio/3gpp");
+
+                    Intent intent = new Intent();
+                    intent.putExtra("url", url);
+                    intent.putExtra("filename", "recording.3gp");
+                    setResult(Activity.RESULT_OK, intent);
+                    finish();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 }
