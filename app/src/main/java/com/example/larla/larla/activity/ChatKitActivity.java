@@ -249,6 +249,11 @@ public class ChatKitActivity extends AppCompatActivity {
             startActivity(roomInfoIntent);
             return true;
         }
+        else if (id == R.id.action_sip_call) {
+            Intent sipCallIntent = new Intent(ChatKitActivity.this, WalkieTalkieActivity.class);
+            startActivity(sipCallIntent);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }

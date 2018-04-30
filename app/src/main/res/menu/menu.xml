@@ -6,4 +6,9 @@
         android:orderInCategory="100"
         android:title="Room info"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_sip_call"
+        android:orderInCategory="100"
+        android:title="SIP call"
+        app:showAsAction="never" />
 </menu>
