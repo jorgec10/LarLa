@@ -388,18 +388,18 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             }
 
             final ImageMessage message = JsonUtils.toImageMessage(event.getContent());
-            final String urlImageBody = message.getThumbnailUrl();
+            final String urlImageBody = message.getUrl();
             if (urlImageBody != null && imageMessageBody != null) {
                 Log.d("image", "printing image");
                 if (!session.getMediasCache().isMediaCached(urlImageBody, message.getMimeType())) {
-                    session.getMediasCache().downloadMedia(getContext(), session.getHomeServerConfig(), urlImageBody, message.getMimeType(), message.info.thumbnail_file, new MXMediaDownloadListener() {
+                    session.getMediasCache().downloadMedia(getContext(), session.getHomeServerConfig(), urlImageBody, message.getMimeType(), message.file, new MXMediaDownloadListener() {
                         @Override
                         public void onDownloadComplete(String downloadId) {
-                            session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 100,100, message.getRotation(), 0, message.info.thumbnailInfo.mimetype, message.info.thumbnail_file);
+                            session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 100,100, message.getRotation(), 0, message.info.mimetype, message.file);
                         }
                     });
                 } else {
-                    session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 100, 100, message.getRotation(), 0, message.info.thumbnailInfo.mimetype, message.info.thumbnail_file);
+                    session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 100, 100, message.getRotation(), 0, message.info.mimetype, message.file);
                 }
             }
 

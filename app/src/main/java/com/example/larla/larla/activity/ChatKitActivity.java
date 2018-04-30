@@ -52,6 +52,8 @@ public class ChatKitActivity extends AppCompatActivity {
     private static final int REQUEST_VIDEO = 101;
     private static final int REQUEST_LOCATION = 102;
     public static final int REQUEST_AUDIO = 103;
+    public static final int REQUEST_IMAGE_GALLERY = 104;
+    public static final int REQUEST_VIDEO_GALLERY = 105;
 
     MXSession session;
     String roomId;
@@ -120,7 +122,12 @@ public class ChatKitActivity extends AppCompatActivity {
             @Override
             public void onAddAttachments() {
                 
-                final CharSequence options[] = new CharSequence[] {"Photo", "Video", "Audio", "Location"};
+                final CharSequence options[] = new CharSequence[] {"Take a photo",
+                                                                    "Photo from gallery",
+                                                                    "Record a video",
+                                                                    "Video from gallery",
+                                                                    "Record an audio",
+                                                                    "Select location",};
                 AlertDialog.Builder builder = new AlertDialog.Builder(ChatKitActivity.this);
                 builder.setTitle("Select attachment");
                 AlertDialog.Builder builder1 = builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -138,7 +145,13 @@ public class ChatKitActivity extends AppCompatActivity {
                                 //REQUEST_IMAGE defines a request code in order to identify it on the onActivityResult
                                 startActivityForResult(imageIntent, REQUEST_IMAGE);
                                 break;
-                            case 1: // Video
+                            case 1: // Image from gallery
+                                Intent galleryIntent = new Intent();
+                                galleryIntent.setType("image/*");
+                                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+                                startActivityForResult(Intent.createChooser(galleryIntent, "Select picture"), REQUEST_IMAGE_GALLERY);
+                                break;
+                            case 2: // Video
                                 Intent videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
                                 //Add extra to save video to our file
                                 destination = new File(Environment.getExternalStorageDirectory(),"myVideo");
@@ -147,14 +160,20 @@ public class ChatKitActivity extends AppCompatActivity {
                                 videoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
                                 startActivityForResult(videoIntent, REQUEST_VIDEO);
                                 break;
-                            case 2: // Audio
-                                Intent audioIntent = new Intent(ChatKitActivity.this, AudioActivity.class);
-                                startActivityForResult(audioIntent, REQUEST_AUDIO);
+                            case 3: // Video from gallery
+                                Intent galleryVideoIntent = new Intent();
+                                galleryVideoIntent.setType("video/*");
+                                galleryVideoIntent.setAction(Intent.ACTION_GET_CONTENT);
+                                startActivityForResult(Intent.createChooser(galleryVideoIntent, "Select picture"), REQUEST_VIDEO_GALLERY);
                                 break;
-                            case 3: // Location
-                                Intent mapsIntent = new Intent(ChatKitActivity.this, MapsActivity.class);
-                                startActivityForResult(mapsIntent, REQUEST_LOCATION);
-                                break;
+                            case 4: // Audio
+                            Intent audioIntent = new Intent(ChatKitActivity.this, AudioActivity.class);
+                            startActivityForResult(audioIntent, REQUEST_AUDIO);
+                            break;
+                            case 5: // Location
+                            Intent mapsIntent = new Intent(ChatKitActivity.this, MapsActivity.class);
+                            startActivityForResult(mapsIntent, REQUEST_LOCATION);
+                            break;
                         }
                     }
                 });
@@ -175,17 +194,31 @@ public class ChatKitActivity extends AppCompatActivity {
 
         }
 
+        else if (requestCode == REQUEST_IMAGE_GALLERY && resultCode == Activity.RESULT_OK) {
+
+            Uri selectedImageUri = data.getData();
+            RoomMediaMessage message = new RoomMediaMessage(selectedImageUri);
+            Log.d("Image from gallery", "Message created, sending with type " + message.getMessageType() + " mime " + message.getMimeType(getApplicationContext()));
+            fragment.sendMediaMessage(message);
+
+        }
+
         else if(requestCode == REQUEST_VIDEO && resultCode == Activity.RESULT_OK) {
             Toast.makeText(this, "Video", Toast.LENGTH_SHORT).show();
         }
 
+        else if(requestCode == REQUEST_VIDEO_GALLERY && resultCode == Activity.RESULT_OK) {
+
+            Uri selectedVideoUri = data.getData();
+            Toast.makeText(this, selectedVideoUri.toString(), Toast.LENGTH_SHORT).show();
+        }
+
         else if(requestCode == REQUEST_LOCATION && resultCode == Activity.RESULT_OK) {
             String location = data.getStringExtra("lat") + " : " + data.getStringExtra("long");
-            //Toast.makeText(this, data.getStringExtra("lat") + " : " + data.getStringExtra("long"), Toast.LENGTH_SHORT).show();
             session.getDataHandler().getRoom(roomId).sendTextMessage(location, null, null, null);
         }
 
-        else if (requestCode== REQUEST_AUDIO && resultCode == Activity.RESULT_OK) {
+        else if (requestCode == REQUEST_AUDIO && resultCode == Activity.RESULT_OK) {
             String url = data.getStringExtra("url");
             String filename = data.getStringExtra("filename");
 
@@ -193,7 +226,7 @@ public class ChatKitActivity extends AppCompatActivity {
             Log.d("Audio", "Message created, sending with type " + message.getMessageType() + " mime " + message.getMimeType(getApplicationContext()));
             fragment.sendMediaMessage(message);
         }
-    };
+    }
 
 
     @Override
