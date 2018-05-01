@@ -57,12 +57,12 @@ public class AudioActivity extends AppCompatActivity {
         play.setEnabled(false);
 
         // Store the audio file
-        outputFile = getExternalCacheDir().getAbsolutePath() + "/recording.3gp";
+        outputFile = getExternalCacheDir().getAbsolutePath() + "/recording.m4a";
 
         // Define audio specs
         myAudioRecorder = new MediaRecorder();
         myAudioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        myAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        myAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         myAudioRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_WB);
         myAudioRecorder.setOutputFile(outputFile);
 
@@ -116,11 +116,11 @@ public class AudioActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    String url = Matrix.getInstance(getApplicationContext()).getSession().getMediasCache().saveMedia(new FileInputStream(new File(outputFile)), "recording.3gp", "audio/3gpp");
+                    String url = Matrix.getInstance(getApplicationContext()).getSession().getMediasCache().saveMedia(new FileInputStream(new File(outputFile)), "recording.m4a", "audio/m4a");
 
                     Intent intent = new Intent();
                     intent.putExtra("url", url);
-                    intent.putExtra("filename", "recording.3gp");
+                    intent.putExtra("filename", "recording.m4a");
                     setResult(Activity.RESULT_OK, intent);
                     finish();
                 } catch (FileNotFoundException e) {

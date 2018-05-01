@@ -35,7 +35,11 @@ import org.matrix.androidsdk.data.RoomMediaMessage;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.callback.ToastErrorHandler;
 import org.matrix.androidsdk.rest.model.Event;
+import org.matrix.androidsdk.rest.model.message.LocationMessage;
 import org.matrix.androidsdk.rest.model.sync.RoomResponse;
+import org.matrix.androidsdk.util.ContentUtils;
+import org.matrix.androidsdk.util.EventUtils;
+import org.matrix.androidsdk.util.JsonUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -140,7 +144,7 @@ public class ChatKitActivity extends AppCompatActivity {
                             case 0: // Photo
                                 Intent imageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 //Add extra to save full-image somewhere
-                                destination = new File(Environment.getExternalStorageDirectory(),"image.jpg");
+                                destination = new File(getExternalCacheDir(),"image.jpg");
                                 imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(destination));
                                 //REQUEST_IMAGE defines a request code in order to identify it on the onActivityResult
                                 startActivityForResult(imageIntent, REQUEST_IMAGE);
@@ -154,7 +158,7 @@ public class ChatKitActivity extends AppCompatActivity {
                             case 2: // Video
                                 Intent videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
                                 //Add extra to save video to our file
-                                destination = new File(Environment.getExternalStorageDirectory(),"myVideo");
+                                destination = new File(getExternalCacheDir(),"video.mp4");
                                 videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(destination));
                                 //Optional extra to set video quality
                                 videoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
@@ -204,24 +208,29 @@ public class ChatKitActivity extends AppCompatActivity {
         }
 
         else if(requestCode == REQUEST_VIDEO && resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, "Video", Toast.LENGTH_SHORT).show();
-        }
+            RoomMediaMessage message = new RoomMediaMessage(Uri.fromFile(destination));
+            fragment.sendMediaMessage(message);        }
 
         else if(requestCode == REQUEST_VIDEO_GALLERY && resultCode == Activity.RESULT_OK) {
 
             Uri selectedVideoUri = data.getData();
-            Toast.makeText(this, selectedVideoUri.toString(), Toast.LENGTH_SHORT).show();
+            RoomMediaMessage message = new RoomMediaMessage(selectedVideoUri);
+            fragment.sendMediaMessage(message);
         }
 
         else if(requestCode == REQUEST_LOCATION && resultCode == Activity.RESULT_OK) {
-            String location = data.getStringExtra("lat") + " : " + data.getStringExtra("long");
-            session.getDataHandler().getRoom(roomId).sendTextMessage(location, null, null, null);
+            String location = "geo:" + data.getStringExtra("lat") + "," + data.getStringExtra("long");
+            LocationMessage locationMessage = new LocationMessage();
+            locationMessage.geo_uri = location;
+            locationMessage.body = "Shared location";
+            locationMessage.msgtype = org.matrix.androidsdk.rest.model.message.Message.MSGTYPE_LOCATION;
+            session.getRoomsApiClient().sendMessage("algo", roomId, locationMessage, new SimpleApiCallback<Event>());
+            //session.getDataHandler().getRoom(roomId).sendTextMessage(location, null, null, null);
         }
 
         else if (requestCode == REQUEST_AUDIO && resultCode == Activity.RESULT_OK) {
             String url = data.getStringExtra("url");
             String filename = data.getStringExtra("filename");
-
             RoomMediaMessage message = new RoomMediaMessage(Uri.parse(url), filename);
             Log.d("Audio", "Message created, sending with type " + message.getMessageType() + " mime " + message.getMimeType(getApplicationContext()));
             fragment.sendMediaMessage(message);

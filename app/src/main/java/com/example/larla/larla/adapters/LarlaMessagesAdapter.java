@@ -22,17 +22,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.larla.larla.R;
+import com.example.larla.larla.utils.MediaUtils;
 
 import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.adapters.AbstractMessagesAdapter;
 import org.matrix.androidsdk.adapters.MessageRow;
 import org.matrix.androidsdk.data.RoomState;
+import org.matrix.androidsdk.listeners.MXEventListener;
 import org.matrix.androidsdk.listeners.MXMediaDownloadListener;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.rest.model.RoomMember;
 import org.matrix.androidsdk.rest.model.message.AudioMessage;
 import org.matrix.androidsdk.rest.model.message.ImageMessage;
+import org.matrix.androidsdk.rest.model.message.LocationMessage;
 import org.matrix.androidsdk.rest.model.message.Message;
 import org.matrix.androidsdk.util.JsonUtils;
 
@@ -260,6 +263,10 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
                                 return getImageView(position,convertView,parent);
                             case Message.MSGTYPE_AUDIO:
                                 return getAudioView(position,convertView,parent);
+                            case Message.MSGTYPE_VIDEO:
+                                return getVideoView(position,convertView,parent);
+                            case Message.MSGTYPE_LOCATION:
+                                return getLocationView(position,convertView,parent);
                             default:
                                 return convertView;
                         }
@@ -269,6 +276,92 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             }
         }
         return convertView;
+    }
+
+    private View getVideoView(int position, View convertView, ViewGroup parent) {
+        MessageRow row = getItem(position);
+        final Event event = row.getEvent();
+
+        if (event.getSender() != null) {
+
+            if (event.getSender().equals(session.getMyUserId())) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_image_send, parent, false);
+            } else {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item_message_image, parent, false);
+            }
+
+            TextView nameTextField = (TextView) convertView.findViewById(R.id.text_message_name);
+            final ImageView imageMessageBody = (ImageView) convertView.findViewById(R.id.image_message_body);
+            TextView timeTextField = (TextView) convertView.findViewById(R.id.text_message_time);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_message_profile);
+
+            String url = session.getDataHandler().getUser(event.getSender()).avatar_url;
+            if (url != null && imageView != null) {
+                session.getMediasCache().loadAvatarThumbnail(session.getHomeServerConfig(), imageView, url,32);
+            }
+
+            if (nameTextField != null) {
+                nameTextField.setText(session.getDataHandler().getUser(event.getSender()).displayname != null ? session.getDataHandler().getUser(event.getSender()).displayname : event.getSender());
+            }
+
+            final ImageMessage message = JsonUtils.toImageMessage(event.getContent());
+            final String urlImageBody = message.getUrl();
+            if (urlImageBody != null && imageMessageBody != null) {
+                Log.d("image", "printing image");
+
+                imageMessageBody.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (MediaUtils.isDowloaded(MediaUtils.MediaTypes.VIDEO, event.eventId)) {
+                            MediaUtils.clickMedia(getContext(), MediaUtils.MediaTypes.VIDEO, event.eventId);
+                        } else {
+                            MediaUtils.downloadMedia(getContext(),session.getContentManager().getDownloadableUrl(urlImageBody), MediaUtils.MediaTypes.VIDEO, event.eventId, true);
+                        }
+                    }
+                });
+
+                if (!session.getMediasCache().isMediaCached(urlImageBody, message.getMimeType())) {
+                    session.getMediasCache().downloadMedia(getContext(), session.getHomeServerConfig(), urlImageBody, message.getMimeType(), message.file, new MXMediaDownloadListener() {
+                        @Override
+                        public void onDownloadComplete(String downloadId) {
+                            session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, message.getThumbnailUrl(), 200,200, message.getRotation(), 0, message.info.thumbnailInfo.mimetype, message.info.thumbnail_file);
+                        }
+                    });
+                } else {
+                    session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, message.getThumbnailUrl(), 200,200, message.getRotation(), 0, message.info.thumbnailInfo.mimetype, message.info.thumbnail_file);
+                }
+            }
+
+            if (timeTextField != null) {
+                Date date = new Date(event.getOriginServerTs());
+                timeTextField.setText(new SimpleDateFormat("HH:mm").format(date));
+            }
+        }
+
+        return convertView;
+    }
+
+    private View getLocationView(int position, View convertView, ViewGroup parent) {
+
+        MessageRow row = getItem(position);
+        final Event event = row.getEvent();
+
+        View view = getTextView(position, convertView, parent);
+
+        TextView infoTextField = (TextView) view.findViewById(R.id.text_message_body);
+
+        infoTextField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LocationMessage locationMessage = JsonUtils.toLocationMessage(event.getContent());
+                Uri gmmIntentUri = Uri.parse(locationMessage.geo_uri + "?q=" + locationMessage.geo_uri.substring(4) + "(" + locationMessage.body + ")");
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                getContext().startActivity(mapIntent);
+            }
+        });
+
+        return view;
     }
 
     private View getAudioView(int position, View convertView, ViewGroup parent) {
@@ -305,31 +398,10 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
                     @Override
                     public void onClick(View v) {
 
-                        final File file = new File(Environment.getExternalStoragePublicDirectory("Larla/Audios"), "audio"+event.getOriginServerTs());
-                        if (file.exists()) {
-                            playAudio(file, message);
+                        if (MediaUtils.isDowloaded(MediaUtils.MediaTypes.AUDIO, event.eventId)) {
+                            MediaUtils.clickMedia(getContext(), MediaUtils.MediaTypes.AUDIO, event.eventId);
                         } else {
-
-                            getContext().registerReceiver(new BroadcastReceiver() {
-                                @Override
-                                public void onReceive(Context context, Intent intent) {
-                                    String action = intent.getAction();
-
-                                    if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                                        playAudio(file, message);
-                                    }
-
-                                }
-                            }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
-                            String uri = session.getContentManager().getDownloadableUrl(urlAudio);
-                            DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(uri));
-                            request.setDestinationInExternalPublicDir("Larla/Audios", "audio"+event.getOriginServerTs());
-                            request.setMimeType(message.getMimeType());
-                            request.setVisibleInDownloadsUi(false);
-                            manager.enqueue(request);
-
+                            MediaUtils.downloadMedia(getContext(),session.getContentManager().getDownloadableUrl(urlAudio), MediaUtils.MediaTypes.AUDIO, event.eventId, true);
                         }
                     }
                 });
@@ -344,26 +416,10 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
         return convertView;
     }
 
-    private void playAudio(File file, AudioMessage message) {
-        MediaPlayer mediaPlayer = new MediaPlayer();
-        try {
-            mediaPlayer.setDataSource(file.getAbsolutePath());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            //Toast.makeText((), "Playing Audio", Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//        Intent playIntent = new Intent();
-//        playIntent.setAction(android.content.Intent.ACTION_VIEW);
-//        playIntent.setDataAndType(Uri.fromFile(file), message.getMimeType());
-//        getContext().startActivity(playIntent);
-    }
-
     private View getImageView(int position, View convertView, ViewGroup parent) {
 
         MessageRow row = getItem(position);
-        Event event = row.getEvent();
+        final Event event = row.getEvent();
 
         if (event.getSender() != null) {
 
@@ -391,15 +447,27 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             final String urlImageBody = message.getUrl();
             if (urlImageBody != null && imageMessageBody != null) {
                 Log.d("image", "printing image");
+
+                imageMessageBody.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (MediaUtils.isDowloaded(MediaUtils.MediaTypes.IMAGE, event.eventId)) {
+                            MediaUtils.clickMedia(getContext(), MediaUtils.MediaTypes.IMAGE, event.eventId);
+                        } else {
+                            MediaUtils.downloadMedia(getContext(),session.getContentManager().getDownloadableUrl(urlImageBody), MediaUtils.MediaTypes.IMAGE, event.eventId, true);
+                        }
+                    }
+                });
+
                 if (!session.getMediasCache().isMediaCached(urlImageBody, message.getMimeType())) {
                     session.getMediasCache().downloadMedia(getContext(), session.getHomeServerConfig(), urlImageBody, message.getMimeType(), message.file, new MXMediaDownloadListener() {
                         @Override
                         public void onDownloadComplete(String downloadId) {
-                            session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 100,100, message.getRotation(), 0, message.info.mimetype, message.file);
+                            session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 200,200, message.getRotation(), 0, message.info.mimetype, message.file);
                         }
                     });
                 } else {
-                    session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 100, 100, message.getRotation(), 0, message.info.mimetype, message.file);
+                    session.getMediasCache().loadBitmap(session.getHomeServerConfig(), imageMessageBody, urlImageBody, 200, 200, message.getRotation(), 0, message.info.mimetype, message.file);
                 }
             }
 
