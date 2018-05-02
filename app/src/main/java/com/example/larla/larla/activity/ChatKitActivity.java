@@ -60,6 +60,10 @@ public class ChatKitActivity extends AppCompatActivity {
     private LarlaMessageListFragment fragment;
     private File destination;
 
+
+
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +76,8 @@ public class ChatKitActivity extends AppCompatActivity {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION};
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.USE_SIP};
 
         if(!hasPermissions(this, permissions)){
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_ALL);
@@ -250,7 +255,7 @@ public class ChatKitActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_sip_call) {
-            Intent sipCallIntent = new Intent(ChatKitActivity.this, WalkieTalkieActivity.class);
+            Intent sipCallIntent = new Intent(ChatKitActivity.this, SipCallActivity.class);
             startActivity(sipCallIntent);
             return true;
         }

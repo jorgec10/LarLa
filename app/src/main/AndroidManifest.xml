@@ -47,6 +47,7 @@
         <activity android:name=".activity.NewChatActivity" />
         <activity android:name=".activity.RoomInfoActivity" />
         <activity android:name=".activity.WalkieTalkieActivity" />
+        <activity android:name=".activity.SipCallActivity" />
 
         <meta-data
             android:name="com.google.android.gms.version"
