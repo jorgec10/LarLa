@@ -29,6 +29,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.*;
 import android.net.sip.*;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -44,7 +45,7 @@ import java.text.ParseException;
  */
 public class WalkieTalkieActivity extends Activity implements View.OnTouchListener {
 
-    public String sipAddress = null;
+    public String sipAddress = "sip:jorgec10@ekiga.net";
 
     public SipManager manager = null;
     public SipProfile me = null;
@@ -63,8 +64,8 @@ public class WalkieTalkieActivity extends Activity implements View.OnTouchListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.walkietalkie);
 
-        ToggleButton pushToTalkButton = (ToggleButton) findViewById(R.id.pushToTalk);
-        pushToTalkButton.setOnTouchListener(this);
+//        ToggleButton pushToTalkButton = (ToggleButton) findViewById(R.id.pushToTalk);
+//        pushToTalkButton.setOnTouchListener(this);
 
         // Set up the intent filter.  This will be used to fire an
         // IncomingCallReceiver when someone calls the SIP address used by this
@@ -79,6 +80,25 @@ public class WalkieTalkieActivity extends Activity implements View.OnTouchListen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         initializeManager();
+
+        Button callButton = findViewById(R.id.makeCall);
+        Button hangupButton = findViewById(R.id.endCall);
+        callButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initiateCall();
+            }
+        });
+        hangupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    call.endCall();
+                } catch (SipException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
@@ -125,9 +145,9 @@ public class WalkieTalkieActivity extends Activity implements View.OnTouchListen
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        String username = prefs.getString("namePref", "");
-        String domain = prefs.getString("domainPref", "");
-        String password = prefs.getString("passPref", "");
+        String username = prefs.getString("namePref", "adrymyry");
+        String domain = prefs.getString("domainPref", "ekiga.net");
+        String password = prefs.getString("passPref", "galaxyyoung");
 
         if (username.length() == 0 || domain.length() == 0 || password.length() == 0) {
             showDialog(UPDATE_SETTINGS_DIALOG);
@@ -143,7 +163,6 @@ public class WalkieTalkieActivity extends Activity implements View.OnTouchListen
             i.setAction("android.SipDemo.INCOMING_CALL");
             PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, Intent.FILL_IN_DATA);
             manager.open(me, pi, null);
-
 
             // This listener must be added AFTER manager.open is called,
             // Otherwise the methods aren't guaranteed to fire.
@@ -191,6 +210,7 @@ public class WalkieTalkieActivity extends Activity implements View.OnTouchListen
      */
     public void initiateCall() {
 
+        Log.d("Call", "calling..." + sipAddress);
         updateStatus(sipAddress);
 
         try {
@@ -198,11 +218,19 @@ public class WalkieTalkieActivity extends Activity implements View.OnTouchListen
                 // Much of the client's interaction with the SIP Stack will
                 // happen via listeners.  Even making an outgoing call, don't
                 // forget to set up a listener to set things up once the call is established.
+
+                @Override
+                public void onCalling(SipAudioCall call) {
+                    Log.d("Call", "onCalling..." + sipAddress);
+                    updateStatus("calling...");
+                }
+
                 @Override
                 public void onCallEstablished(SipAudioCall call) {
+                    Log.d("Call", "onCallEstablished..." + sipAddress);
                     call.startAudio();
                     call.setSpeakerMode(true);
-                    call.toggleMute();
+                    Log.d("Call", "onCallEstablished..." + call.isMuted());
                     updateStatus(call);
                 }
 

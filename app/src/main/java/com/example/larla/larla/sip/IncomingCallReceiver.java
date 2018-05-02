@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.sip.*;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.larla.larla.activity.WalkieTalkieActivity;
 
@@ -35,13 +36,16 @@ public class IncomingCallReceiver extends BroadcastReceiver {
      * @param intent The intent being received.
      */
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
+        Log.d("Call", "onReceive...");
+
         SipAudioCall incomingCall = null;
         try {
 
             SipAudioCall.Listener listener = new SipAudioCall.Listener() {
                 @Override
                 public void onRinging(SipAudioCall call, SipProfile caller) {
+                    Toast.makeText(context, "ringing", Toast.LENGTH_LONG).show();
                     try {
                         call.answerCall(30);
                     } catch (Exception e) {
@@ -49,10 +53,12 @@ public class IncomingCallReceiver extends BroadcastReceiver {
                     }
                 }
             };
+            Log.d("Call", "receiving...");
 
             WalkieTalkieActivity wtActivity = (WalkieTalkieActivity) context;
 
             incomingCall = wtActivity.manager.takeAudioCall(intent, listener);
+            Toast.makeText(context, "ringing2", Toast.LENGTH_LONG).show();
             incomingCall.answerCall(30);
             incomingCall.startAudio();
             incomingCall.setSpeakerMode(true);
