@@ -17,6 +17,8 @@ import com.example.larla.larla.sip.LarlaSipManager;
 
 public class SipSettingsActivity extends AppCompatActivity {
 
+    LarlaSipManager sipManager = LarlaSipManager.getInstance(this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,19 +27,29 @@ public class SipSettingsActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(96, 96, 96, 96);
 
+        String username = null, domain = null, password = null;
+        if(sipManager.getProfile() != null) {
+            username = sipManager.getProfile().getUserName();
+            password = sipManager.getProfile().getPassword();
+            domain = sipManager.getProfile().getSipDomain();
+        }
+
         final EditText userNameInput = new EditText(this);
         userNameInput.setInputType(InputType.TYPE_CLASS_TEXT);
         userNameInput.setHint("User name");
+        userNameInput.setText(username);
         layout.addView(userNameInput);
 
         final EditText domainInput = new EditText(this);
         domainInput.setInputType(InputType.TYPE_CLASS_TEXT);
         domainInput.setHint("SIP domain");
+        domainInput.setText(domain);
         layout.addView(domainInput);
 
         final EditText passwordInput = new EditText(this);
         passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         passwordInput.setHint("Password");
+        passwordInput.setText(password);
         layout.addView(passwordInput);
 
         final Button save = new Button(this);
@@ -54,7 +66,7 @@ public class SipSettingsActivity extends AppCompatActivity {
                     Toast.makeText(SipSettingsActivity.this, "Wrong credentials", Toast.LENGTH_SHORT).show();
                 }
 
-                LarlaSipManager.getInstance(getApplicationContext()).initializeManager(username, domain, password);
+                sipManager.initializeManager(username, domain, password);
             }
         });
         layout.addView(save);

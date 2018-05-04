@@ -160,4 +160,8 @@ public class LarlaSipManager {
     public void setCall(SipAudioCall call) {
         this.call = call;
     }
+
+    public SipProfile getProfile() {
+        return me;
+    }
 }
