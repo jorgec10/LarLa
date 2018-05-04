@@ -255,6 +255,7 @@ public class ChatKitActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_room_info) {
             Intent roomInfoIntent = new Intent(ChatKitActivity.this, RoomInfoActivity.class);
+            roomInfoIntent.putExtra("roomId", roomId);
             startActivity(roomInfoIntent);
             return true;
         }

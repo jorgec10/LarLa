@@ -5,13 +5,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
     tools:context=".activity.RoomInfoActivity">
 
-    <TextView
-        android:id="@+id/textView2"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Room info"
-        android:textAlignment="center"
-        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/newMemberEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="New member id"
+            android:inputType="textEmailAddress" />
+
+        <Button
+            android:id="@+id/buttonAddMember"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Add member" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textMembers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Members"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+    <ListView
+        android:id="@+id/membersList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
 </LinearLayout>
