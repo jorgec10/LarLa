@@ -200,7 +200,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(userInfoIntent);
         } else if (id == R.id.nav_settings) {
             // ToDo
-            Toast.makeText(this, "App settings", Toast.LENGTH_SHORT).show();
+            Intent callIntent = new Intent(MainActivity.this, SipSettingsActivity.class);
+            startActivity(callIntent);
         } else if (id == R.id.nav_share) {
             // ToDo
             Toast.makeText(this, "Share app URL via other apps", Toast.LENGTH_SHORT).show();
@@ -208,6 +209,7 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        item.setChecked(false);
         return true;
     }
 

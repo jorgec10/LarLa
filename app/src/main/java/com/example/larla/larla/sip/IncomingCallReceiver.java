@@ -16,8 +16,10 @@ package com.example.larla.larla.sip;
  * limitations under the License.
  */
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.sip.*;
 import android.util.Log;
@@ -39,12 +41,12 @@ public class IncomingCallReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, Intent intent) {
         Log.d("Call", "onReceive...");
 
-        SipAudioCall incomingCall = null;
         try {
 
             SipAudioCall.Listener listener = new SipAudioCall.Listener() {
                 @Override
                 public void onRinging(SipAudioCall call, SipProfile caller) {
+
                     Toast.makeText(context, "ringing", Toast.LENGTH_LONG).show();
                     try {
                         call.answerCall(30);
@@ -55,26 +57,51 @@ public class IncomingCallReceiver extends BroadcastReceiver {
             };
             Log.d("Call", "receiving...");
 
-            WalkieTalkieActivity wtActivity = (WalkieTalkieActivity) context;
+            final SipAudioCall incomingCall = LarlaSipManager.getInstance(context).getManager().takeAudioCall(intent, listener);
 
-            incomingCall = wtActivity.manager.takeAudioCall(intent, listener);
             Toast.makeText(context, "ringing2", Toast.LENGTH_LONG).show();
-            incomingCall.answerCall(30);
-            incomingCall.startAudio();
-            incomingCall.setSpeakerMode(true);
-            if(incomingCall.isMuted()) {
-                incomingCall.toggleMute();
-            }
 
-            wtActivity.call = incomingCall;
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+            dialogBuilder.setTitle(LarlaSipManager.getInstance(context).getManager().getSessionFor(intent).getPeerProfile().getUriString());
+            dialogBuilder.setPositiveButton("Pick up", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    try {
+                        incomingCall.answerCall(30);
+                        incomingCall.startAudio();
+                        incomingCall.setSpeakerMode(true);
+                        if (incomingCall.isMuted()) {
+                            incomingCall.toggleMute();
+                        }
 
-            wtActivity.updateStatus(incomingCall);
+                        LarlaSipManager.getInstance(context).setCall(incomingCall);
+                    } catch (SipException e) {
+                        if (incomingCall != null) {
+                            incomingCall.close();
+                        }
+                    }
 
-        } catch (Exception e) {
-            if (incomingCall != null) {
-                incomingCall.close();
-            }
+                }
+            });
+
+            dialogBuilder.setNegativeButton("Hang up", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    try {
+                        incomingCall.endCall();
+                    } catch (SipException e) {
+                        if (incomingCall != null) {
+                            incomingCall.close();
+                        }
+                    }
+                    dialog.cancel();
+                }
+            });
+
+            dialogBuilder.show();
+
+        } catch (SipException e) {
+            e.printStackTrace();
         }
     }
-
 }
