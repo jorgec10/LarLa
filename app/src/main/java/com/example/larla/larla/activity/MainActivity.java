@@ -200,7 +200,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(userInfoIntent);
         } else if (id == R.id.nav_settings) {
             // ToDo
-            Toast.makeText(this, "App settings", Toast.LENGTH_SHORT).show();
+            Intent callIntent = new Intent(MainActivity.this, SipSettingsActivity.class);
+            startActivity(callIntent);
         } else if (id == R.id.nav_share) {
             // ToDo
             Toast.makeText(this, "Share app URL via other apps", Toast.LENGTH_SHORT).show();
@@ -208,6 +209,32 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        item.setChecked(false);
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_call) {
+            Intent callIntent = new Intent(MainActivity.this, SipCallActivity.class);
+            startActivity(callIntent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+
     }
 }

@@ -23,5 +23,7 @@
     <string name="hint_enter_a_message" />
     <string name="userId">Matrix user id</string>
     <string name="userName">User name</string>
+    <string name="contactAddress">SIP Address to contact</string>
+    <string name="talk">Talk</string>
 
 </resources>
