@@ -176,12 +176,12 @@ public class ChatKitActivity extends AppCompatActivity {
                                 startActivityForResult(Intent.createChooser(galleryVideoIntent, "Select picture"), REQUEST_VIDEO_GALLERY);
                                 break;
                             case 4: // Audio
-                            Intent audioIntent = new Intent(ChatKitActivity.this, AudioActivity.class);
-                            startActivityForResult(audioIntent, REQUEST_AUDIO);
+                                Intent audioIntent = new Intent(ChatKitActivity.this, AudioActivity.class);
+                                startActivityForResult(audioIntent, REQUEST_AUDIO);
                             break;
                             case 5: // Location
-                            Intent mapsIntent = new Intent(ChatKitActivity.this, MapsActivity.class);
-                            startActivityForResult(mapsIntent, REQUEST_LOCATION);
+                                Intent mapsIntent = new Intent(ChatKitActivity.this, MapsActivity.class);
+                                startActivityForResult(mapsIntent, REQUEST_LOCATION);
                             break;
                         }
                     }

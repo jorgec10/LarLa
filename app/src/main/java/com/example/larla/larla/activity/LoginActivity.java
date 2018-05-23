@@ -325,7 +325,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Attempt authentication against a network service.
             return Matrix.getInstance(getApplicationContext()).login(mEmail, mPassword);
 
-            // TODO: register the new account here.
         }
 
         @Override
