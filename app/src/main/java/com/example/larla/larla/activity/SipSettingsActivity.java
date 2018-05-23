@@ -67,6 +67,7 @@ public class SipSettingsActivity extends AppCompatActivity {
                 }
 
                 sipManager.initializeManager(username, domain, password);
+                Toast.makeText(SipSettingsActivity.this, "Credentials stored succesfully", Toast.LENGTH_SHORT).show();
             }
         });
         layout.addView(save);

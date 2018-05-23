@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,6 +28,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -50,6 +52,7 @@ import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.model.CreateRoomParams;
 import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.util.JsonUtils;
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -240,8 +243,19 @@ public class MainActivity extends AppCompatActivity
             Intent callIntent = new Intent(MainActivity.this, SipSettingsActivity.class);
             startActivity(callIntent);
         } else if (id == R.id.nav_share) {
-            // ToDo
-            Toast.makeText(this, "Share app URL via other apps", Toast.LENGTH_SHORT).show();
+
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+            alertBuilder.setTitle("About Larla");
+            alertBuilder.setMessage("An awesome chat Android app for the people that are ready to be unplugged.\n\n" +
+                                    "@adrymyry & @jorgec10\n\n" +
+                                    "University of Murcia\n" +
+                                    "2018");
+            alertBuilder.setPositiveButton("OK", null);
+            AlertDialog dialog = alertBuilder.show();
+            TextView messageText = (TextView)dialog.findViewById(android.R.id.message);
+            messageText.setGravity(Gravity.CENTER);
+            dialog.show();
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
