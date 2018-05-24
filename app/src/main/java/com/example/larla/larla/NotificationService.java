@@ -57,8 +57,8 @@ public class NotificationService extends Service {
             public void onLiveEvent(Event event, RoomState roomState) {
                 if (session.getDataHandler().isInitialSyncComplete()) {
 
-                    if(event.type.equals(Event.EVENT_TYPE_MESSAGE)) {
-                    //if (event.type.equals(Event.EVENT_TYPE_MESSAGE) && !event.getSender().equals(session.getMyUserId())) {
+                    //if(event.type.equals(Event.EVENT_TYPE_MESSAGE)) {
+                    if (event.type.equals(Event.EVENT_TYPE_MESSAGE) && !event.getSender().equals(session.getMyUserId())) {
                         NotificationCompat.Builder mBuilder =
                                 new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
                                         .setSmallIcon(R.mipmap.ic_launcher)
