@@ -123,8 +123,6 @@ public class MainActivity extends AppCompatActivity
                 });
 
                 dialogBuilder.show();
-//                Intent newChatIntent = new Intent(MainActivity.this, NewChatActivity.class);
-//                startActivity(newChatIntent);
             }
         });
 

@@ -25,6 +25,7 @@ public class RoomInfoActivity extends AppCompatActivity {
 
     private MXSession session;
     private String roomId;
+    String inviteUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +39,14 @@ public class RoomInfoActivity extends AppCompatActivity {
 
         setTitle(roomState.getDisplayName(session.getMyUserId()));
 
-        EditText newMemberEmail = (EditText) findViewById(R.id.newMemberEmail);
-        final String email = newMemberEmail.getText().toString();
+        final EditText newMemberEmail = (EditText) findViewById(R.id.newMemberEmail);
         Button addMemberButton = (Button) findViewById(R.id.buttonAddMember);
         addMemberButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Matrix.getInstance(RoomInfoActivity.this).getSession().getDataHandler().getRoom(roomId).inviteByEmail(email, new SimpleApiCallback<Void>());
+                inviteUser = newMemberEmail.getText().toString();
+                inviteUser = "@" + inviteUser + ":matrix.org";
+                Matrix.getInstance(RoomInfoActivity.this).getSession().getDataHandler().getRoom(roomId).invite(inviteUser, new SimpleApiCallback<Void>());
             }
         });
 
