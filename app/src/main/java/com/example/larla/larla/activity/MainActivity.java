@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity
 
         session = Matrix.getInstance(getApplicationContext()).getSession();
 
-        String userName = this.getIntent().getStringExtra("userName");
+        final String userName = this.getIntent().getStringExtra("userName");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity
             public void onLiveEvent(Event event, RoomState roomState) {
                 if (session.getDataHandler().isInitialSyncComplete()) {
 
-                    if (event.type.equals(Event.EVENT_TYPE_MESSAGE)) {
+                    if (event.type.equals(Event.EVENT_TYPE_MESSAGE) && !event.getSender().equals("@" + userName + ":matrix.org")) {
                         NotificationCompat.Builder mBuilder =
                                 new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
                                         .setSmallIcon(R.mipmap.ic_launcher)

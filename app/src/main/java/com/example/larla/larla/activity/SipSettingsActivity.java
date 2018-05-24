@@ -1,7 +1,6 @@
 package com.example.larla.larla.activity;
 
-import android.content.DialogInterface;
-import android.net.sip.SipManager;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -9,7 +8,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.larla.larla.R;
@@ -19,6 +17,8 @@ public class SipSettingsActivity extends AppCompatActivity {
 
     LarlaSipManager sipManager = LarlaSipManager.getInstance(this);
 
+    String username = null, domain = null, password = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,11 +27,16 @@ public class SipSettingsActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(96, 96, 96, 96);
 
-        String username = null, domain = null, password = null;
         if(sipManager.getProfile() != null) {
             username = sipManager.getProfile().getUserName();
             password = sipManager.getProfile().getPassword();
             domain = sipManager.getProfile().getSipDomain();
+        }
+        else {
+            SharedPreferences preferences = getBaseContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+            username = preferences.getString("sipUsername", null);
+            password = preferences.getString("sipPassword", null);
+            domain = preferences.getString("sipDomain", null);
         }
 
         final EditText userNameInput = new EditText(this);
@@ -65,6 +70,13 @@ public class SipSettingsActivity extends AppCompatActivity {
                 if (username.length() == 0 || domain.length() == 0 || password.length() == 0) {
                     Toast.makeText(SipSettingsActivity.this, "Wrong credentials", Toast.LENGTH_SHORT).show();
                 }
+
+                SharedPreferences preferences = getBaseContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("sipUsername", username);
+                editor.putString("sipDomain", domain);
+                editor.putString("sipPassword", password);
+                editor.apply();
 
                 sipManager.initializeManager(username, domain, password);
                 Toast.makeText(SipSettingsActivity.this, "Credentials stored succesfully", Toast.LENGTH_SHORT).show();

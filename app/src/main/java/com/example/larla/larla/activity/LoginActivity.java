@@ -7,6 +7,7 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -98,6 +99,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        AutoCompleteTextView usernameText = findViewById(R.id.email);
+        EditText passwordText = findViewById(R.id.password);
+
+        SharedPreferences preferences = getBaseContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String matrixUsername = preferences.getString("matrixUsername", null);
+        String matrixPassword = preferences.getString("matrixPassword", null);
+
+        if (matrixUsername != null && matrixPassword != null){
+            usernameText.setText(matrixUsername);
+            passwordText.setText(matrixPassword);
+        }
+
     }
 
     private void populateAutoComplete() {
@@ -324,7 +338,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                Toast.makeText(getApplicationContext(), "Logged in", Toast.LENGTH_SHORT);
+
+                SharedPreferences preferences = getBaseContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("matrixUsername", mEmail);
+                editor.putString("matrixPassword", mPassword);
+                editor.apply();
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 intent.putExtra("userName", mEmailView.getText().toString());
                 startActivity(intent);
