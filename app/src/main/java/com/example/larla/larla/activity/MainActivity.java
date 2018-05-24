@@ -1,41 +1,35 @@
 package com.example.larla.larla.activity;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
-import android.text.InputType;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.larla.larla.Matrix;
+import com.example.larla.larla.NotificationAlarm;
 import com.example.larla.larla.R;
 import com.example.larla.larla.models.Chat;
 import com.stfalcon.chatkit.commons.ImageLoader;
@@ -45,20 +39,11 @@ import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 
 import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.data.Room;
-import org.matrix.androidsdk.data.RoomState;
-import org.matrix.androidsdk.data.RoomSummary;
 import org.matrix.androidsdk.listeners.MXEventListener;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
-import org.matrix.androidsdk.rest.model.CreateRoomParams;
-import org.matrix.androidsdk.rest.model.Event;
-import org.matrix.androidsdk.util.JsonUtils;
-import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-    public static final String CHANNEL_ID = "com.example.larla.MESSAGES";
-    public static final String CHANNEL_NAME = "Mensajes";
 
     private MXSession session;
     private MXEventListener sessionListener;
@@ -91,6 +76,12 @@ public class MainActivity extends AppCompatActivity
         session = Matrix.getInstance(getApplicationContext()).getSession();
 
         final String userName = this.getIntent().getStringExtra("userName");
+
+        Intent alarm = new Intent(this, NotificationAlarm.class);
+        PendingIntent recurringAlarm = PendingIntent.getBroadcast(this, 0, alarm, PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarms.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, recurringAlarm);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -141,23 +132,6 @@ public class MainActivity extends AppCompatActivity
         textNavBar.setText(userName);
         navigationView.setNavigationItemSelectedListener(this);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Create the NotificationChannel, but only on API 26+ because
-            // the NotificationChannel class is new and not in the support library
-
-            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,
-                    CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
-
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
-            notificationChannel.setShowBadge(true);
-            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(notificationChannel);
-
-        }
-
         dialogsListAdapter = new DialogsListAdapter<>(new ImageLoader() {
             @Override
             public void loadImage(ImageView imageView, String url) {
@@ -181,26 +155,6 @@ public class MainActivity extends AppCompatActivity
 
                 for (Room room : session.getDataHandler().getStore().getRooms()) {
                     dialogsListAdapter.addItem(new Chat(session, room.getState()));
-                }
-            }
-
-            @Override
-            public void onLiveEvent(Event event, RoomState roomState) {
-                if (session.getDataHandler().isInitialSyncComplete()) {
-
-                    if (event.type.equals(Event.EVENT_TYPE_MESSAGE) && !event.getSender().equals("@" + userName + ":matrix.org")) {
-                        NotificationCompat.Builder mBuilder =
-                                new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
-                                        .setSmallIcon(R.mipmap.ic_launcher)
-                                        .setStyle(new NotificationCompat.MessagingStyle(session.getMyUser().displayname)
-                                                .setConversationTitle(roomState.name)
-                                                .addMessage(JsonUtils.toMessage(event.getContent()).body, event.getOriginServerTs(), session.getDataHandler().getUser(event.getSender()).displayname)).setSmallIcon(R.drawable.ic_stat_name).setColor(Color.argb(0, 75, 143, 255)).setColorized(true);
-
-                        NotificationManager mNotificationManager =
-                                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-                        mNotificationManager.notify(event.hashCode(), mBuilder.build());
-                    }
                 }
             }
         };
@@ -248,7 +202,6 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
-
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
