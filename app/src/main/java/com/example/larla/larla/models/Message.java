@@ -28,7 +28,7 @@ public class Message implements IMessage {
             org.matrix.androidsdk.rest.model.message.Message message = JsonUtils.toMessage(event.getContent());
             return message.body;
         }
-        return "No message event";
+        return "Event not displayable";
     }
 
     @Override

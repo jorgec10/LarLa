@@ -551,7 +551,18 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
             // A message is displayable as long as it has a body
             // Redacted messages should not be displayed
             Message message = JsonUtils.toMessage(event.getContent());
-            return !TextUtils.isEmpty(message.body);
+            switch (message.msgtype) {
+                case Message.MSGTYPE_TEXT:
+                    return !TextUtils.isEmpty(message.body);
+                case Message.MSGTYPE_AUDIO:
+                case Message.MSGTYPE_IMAGE:
+                case Message.MSGTYPE_LOCATION:
+                case Message.MSGTYPE_VIDEO:
+                    return true;
+                default:
+                    return false;
+            }
+
         }
 
         return false;
