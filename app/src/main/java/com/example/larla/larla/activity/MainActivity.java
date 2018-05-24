@@ -258,6 +258,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_user) {
             Intent userInfoIntent = new Intent(MainActivity.this, UserInfoActivity.class);
+            userInfoIntent.putExtra("userId", session.getDataHandler().getUserId());
             startActivity(userInfoIntent);
         } else if (id == R.id.nav_settings) {
             // ToDo

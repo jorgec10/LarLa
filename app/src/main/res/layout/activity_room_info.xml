@@ -7,6 +7,8 @@
     android:orientation="vertical"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp"
     tools:context=".activity.RoomInfoActivity">
 
     <LinearLayout
@@ -36,6 +38,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Members"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:textAppearance="@android:style/TextAppearance.Material.Medium" />
 
     <ListView

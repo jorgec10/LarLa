@@ -1,5 +1,6 @@
 package com.example.larla.larla.activity;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,7 +53,7 @@ public class RoomInfoActivity extends AppCompatActivity {
         });
 
         ListView membersList = (ListView) findViewById(R.id.membersList);
-        ArrayAdapter<RoomMember> members = new ArrayAdapter<RoomMember>(this, android.R.layout.simple_list_item_1) {
+        final ArrayAdapter<RoomMember> members = new ArrayAdapter<RoomMember>(this, android.R.layout.simple_list_item_1) {
 
             @NonNull
             @Override
@@ -70,6 +72,16 @@ public class RoomInfoActivity extends AppCompatActivity {
                 return convertView;
             }
         };
+
+        membersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                RoomMember member = members.getItem(position);
+                Intent memberInfoIntent = new Intent(RoomInfoActivity.this, UserInfoActivity.class);
+                memberInfoIntent.putExtra("userId", member.getUserId());
+                startActivity(memberInfoIntent);
+            }
+        });
 
         for (RoomMember roomMember : roomState.getMembers()) {
             if (!roomMember.getUserId().equals(session.getMyUserId())) {
