@@ -59,7 +59,10 @@ public class MainActivity extends AppCompatActivity
 
     public static final String CHANNEL_ID = "com.example.larla.MESSAGES";
     public static final String CHANNEL_NAME = "Mensajes";
+
     private MXSession session;
+    private MXEventListener sessionListener;
+    private DialogsListAdapter dialogsListAdapter;
 
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -155,7 +158,7 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        final DialogsListAdapter dialogsListAdapter = new DialogsListAdapter<>(new ImageLoader() {
+        dialogsListAdapter = new DialogsListAdapter<>(new ImageLoader() {
             @Override
             public void loadImage(ImageView imageView, String url) {
                 Log.d("Image", "loadImage: loading... " + url);
@@ -172,7 +175,7 @@ public class MainActivity extends AppCompatActivity
         listView.setAdapter(dialogsListAdapter);
 
 
-        session.getDataHandler().addListener(new MXEventListener() {
+        sessionListener = new MXEventListener() {
             @Override
             public void onInitialSyncComplete(String toToken) {
 
@@ -200,7 +203,9 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
-        });
+        };
+
+        session.getDataHandler().addListener(sessionListener);
 
         dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
             @Override
@@ -210,9 +215,27 @@ public class MainActivity extends AppCompatActivity
                 String roomName = dialog.getDialogName();
                 intent.putExtra("roomId", roomId);
                 intent.putExtra("roomName", roomName);
+
+                session.getDataHandler().getRoom(roomId).markAllAsRead(new SimpleApiCallback<Void>());
+
                 startActivity(intent);
             }
         });
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        dialogsListAdapter.clear();
+        session.getDataHandler().removeListener(sessionListener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        dialogsListAdapter.clear();
+        session.getDataHandler().addListener(sessionListener);
 
     }
 

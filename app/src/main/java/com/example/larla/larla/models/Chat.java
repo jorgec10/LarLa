@@ -33,8 +33,14 @@ public class Chat implements IDialog {
 
     @Override
     public String getDialogPhoto() {
-        Log.d("Image", "getDialogPhoto: " + roomState.getAvatarUrl());
-        return roomState.getAvatarUrl();
+
+        Log.d("Chat", "getDialogPhoto: " + getDialogName() + " " + roomState.getDisplayableMembers().size());
+
+        if (roomState.getDisplayableMembers().size() > 2) {
+            return roomState.getAvatarUrl();
+        } else {
+            return roomState.getDisplayableMembers().iterator().next().avatarUrl;
+        }
     }
 
     @Override
