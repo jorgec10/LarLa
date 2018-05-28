@@ -1,26 +1,15 @@
 package com.example.larla.larla.activity;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.larla.larla.Matrix;
 import com.example.larla.larla.R;
 
 import org.matrix.androidsdk.MXSession;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
 public class UserInfoActivity extends AppCompatActivity {
 

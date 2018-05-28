@@ -11,8 +11,6 @@ import android.net.sip.SipRegistrationListener;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.larla.larla.activity.SipCallActivity;
-
 import java.text.ParseException;
 
 public class LarlaSipManager {
@@ -58,20 +56,20 @@ public class LarlaSipManager {
             manager.setRegistrationListener(me.getUriString(), new SipRegistrationListener() {
                 public void onRegistering(String localProfileUri) {
                     //updateStatus("Registering with SIP Server...");
-                    //Toast.makeText(SipCallActivity.this, "Registering...", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "Registering...", Toast.LENGTH_SHORT).show();
                     Log.d("Register", "Registering");
                 }
 
                 public void onRegistrationDone(String localProfileUri, long expiryTime) {
                     //updateStatus("Ready");
-                    //Toast.makeText(SipCallActivity.this, "Registration done...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Registration done...", Toast.LENGTH_SHORT).show();
                     Log.d("Register", "Register done");
                 }
 
                 public void onRegistrationFailed(String localProfileUri, int errorCode,
                                                  String errorMessage) {
                     //updateStatus("Registration failed.  Please check settings.");
-                    //Toast.makeText(SipCallActivity.this, "Registration failed" + errorMessage, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Registration failed" + errorMessage, Toast.LENGTH_SHORT).show();
                     Log.d("Register", "Register failed" + errorMessage);
                 }
             });
@@ -126,12 +124,12 @@ public class LarlaSipManager {
 
         }
         catch (Exception e) {
-            Log.i("WalkieTalkieActivity/InitiateCall", "Error when trying to close manager.", e);
+            Log.i("LarlaSipManager/InitiateCall", "Error when trying to close manager.", e);
             if (me != null) {
                 try {
                     manager.close(me.getUriString());
                 } catch (Exception ee) {
-                    Log.i("WalkieTalkieActivity/InitiateCall",
+                    Log.i("LarlaSipManager/InitiateCall",
                             "Error when trying to close manager.", ee);
                     ee.printStackTrace();
                 }
@@ -164,4 +162,5 @@ public class LarlaSipManager {
     public SipProfile getProfile() {
         return me;
     }
+
 }

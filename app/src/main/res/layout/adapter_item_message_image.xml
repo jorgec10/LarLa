@@ -30,7 +30,7 @@
 
     <ImageView
         android:id="@+id/image_message_body"
-        android:background="@drawable/rounded_rectangle_orange"
+        android:background="@drawable/rounded_rectangle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="240dp"

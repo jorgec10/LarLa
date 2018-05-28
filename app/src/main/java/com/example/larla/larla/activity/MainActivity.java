@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -29,9 +30,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.larla.larla.Matrix;
-import com.example.larla.larla.NotificationAlarm;
+import com.example.larla.larla.notifications.NotificationAlarm;
 import com.example.larla.larla.R;
 import com.example.larla.larla.models.Chat;
+import com.example.larla.larla.sip.LarlaSipManager;
 import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.commons.models.IDialog;
 import com.stfalcon.chatkit.dialogs.DialogsList;
@@ -164,7 +166,7 @@ public class MainActivity extends AppCompatActivity
         dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
             @Override
             public void onDialogClick(IDialog dialog) {
-                Intent intent = new Intent(MainActivity.this, ChatKitActivity.class);
+                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
                 String roomId = dialog.getId();
                 String roomName = dialog.getDialogName();
                 intent.putExtra("roomId", roomId);
@@ -175,6 +177,13 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+
+        SharedPreferences preferences = getBaseContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String sipUsername = preferences.getString("sipUsername", null);
+        String sipPassword = preferences.getString("sipPassword", null);
+        String sipDomain = preferences.getString("sipDomain", null);
+
+        LarlaSipManager.getInstance(this).initializeManager(sipUsername, sipDomain, sipPassword);
 
     }
 
@@ -214,7 +223,6 @@ public class MainActivity extends AppCompatActivity
             userInfoIntent.putExtra("userId", session.getDataHandler().getUserId());
             startActivity(userInfoIntent);
         } else if (id == R.id.nav_settings) {
-            // ToDo
             Intent callIntent = new Intent(MainActivity.this, SipSettingsActivity.class);
             startActivity(callIntent);
         } else if (id == R.id.nav_share) {

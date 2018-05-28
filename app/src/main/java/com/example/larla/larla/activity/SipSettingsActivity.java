@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.example.larla.larla.R;
 import com.example.larla.larla.sip.LarlaSipManager;
 
 public class SipSettingsActivity extends AppCompatActivity {
@@ -66,17 +65,16 @@ public class SipSettingsActivity extends AppCompatActivity {
                 String username = userNameInput.getText().toString();
                 String domain = domainInput.getText().toString();
                 String password = passwordInput.getText().toString();
-
-                if (username.length() == 0 || domain.length() == 0 || password.length() == 0) {
-                    Toast.makeText(SipSettingsActivity.this, "Wrong credentials", Toast.LENGTH_SHORT).show();
-                }
-
                 SharedPreferences preferences = getBaseContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("sipUsername", username);
                 editor.putString("sipDomain", domain);
                 editor.putString("sipPassword", password);
                 editor.apply();
+
+                if (username.length() == 0 || domain.length() == 0 || password.length() == 0) {
+                    Toast.makeText(SipSettingsActivity.this, "Wrong credentials", Toast.LENGTH_SHORT).show();
+                }
 
                 sipManager.initializeManager(username, domain, password);
                 Toast.makeText(SipSettingsActivity.this, "Credentials stored succesfully", Toast.LENGTH_SHORT).show();

@@ -12,7 +12,7 @@
         android:id="@+id/play_message_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_rectangle_green"
+        android:background="@drawable/rounded_rectangle_send"
         android:layout_marginRight="8dp"
         android:maxWidth="240dp"
         android:text="Play"

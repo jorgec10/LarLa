@@ -23,17 +23,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.sip.*;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.example.larla.larla.activity.WalkieTalkieActivity;
 
-/**
- * Listens for incoming SIP calls, intercepts and hands them off to WalkieTalkieActivity.
- */
 public class IncomingCallReceiver extends BroadcastReceiver {
     /**
-     * Processes the incoming call, answers it, and hands it over to the
-     * WalkieTalkieActivity.
+     * Processes the incoming call, answers it, and hands it
      * @param context The context under which the receiver is running.
      * @param intent The intent being received.
      */
@@ -46,8 +40,6 @@ public class IncomingCallReceiver extends BroadcastReceiver {
             SipAudioCall.Listener listener = new SipAudioCall.Listener() {
                 @Override
                 public void onRinging(SipAudioCall call, SipProfile caller) {
-
-                    Toast.makeText(context, "ringing", Toast.LENGTH_LONG).show();
                     try {
                         call.answerCall(30);
                     } catch (Exception e) {
@@ -58,8 +50,6 @@ public class IncomingCallReceiver extends BroadcastReceiver {
             Log.d("Call", "receiving...");
 
             final SipAudioCall incomingCall = LarlaSipManager.getInstance(context).getManager().takeAudioCall(intent, listener);
-
-            Toast.makeText(context, "ringing2", Toast.LENGTH_LONG).show();
 
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
             dialogBuilder.setTitle(LarlaSipManager.getInstance(context).getManager().getSessionFor(intent).getPeerProfile().getUriString());

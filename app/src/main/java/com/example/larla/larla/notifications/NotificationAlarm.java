@@ -1,4 +1,4 @@
-package com.example.larla.larla;
+package com.example.larla.larla.notifications;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -1,40 +1,22 @@
 package com.example.larla.larla.activity;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Debug;
-import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.larla.larla.Matrix;
 import com.example.larla.larla.R;
 
-import org.matrix.androidsdk.data.RoomMediaMessage;
-import org.matrix.androidsdk.listeners.IMXMediaUploadListener;
-import org.matrix.androidsdk.listeners.MXMediaUploadListener;
-import org.matrix.androidsdk.rest.model.Event;
-import org.matrix.androidsdk.util.ContentUtils;
-import org.matrix.androidsdk.util.EventUtils;
-import org.matrix.androidsdk.util.JsonUtils;
-import org.matrix.androidsdk.util.ResourceUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import static com.example.larla.larla.activity.MainActivity.hasPermissions;
 
 public class AudioActivity extends AppCompatActivity {
     private Button play, stop, record, upload;
@@ -44,7 +26,7 @@ public class AudioActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.audio_activity);
+        setContentView(R.layout.activity_audio);
 
         // Buttons
         play = (Button) findViewById(R.id.play);
@@ -55,6 +37,7 @@ public class AudioActivity extends AppCompatActivity {
         // Disable stop and play buttons while not recording
         stop.setEnabled(false);
         play.setEnabled(false);
+        upload.setEnabled(false);
 
         // Store the audio file
         outputFile = getExternalCacheDir().getAbsolutePath() + "/recording.m4a";
@@ -92,6 +75,7 @@ public class AudioActivity extends AppCompatActivity {
                 record.setEnabled(true);
                 stop.setEnabled(false);
                 play.setEnabled(true);
+                upload.setEnabled(true);
                 Toast.makeText(getApplicationContext(), "Audio Recorder successfully", Toast.LENGTH_LONG).show();
             }
         });

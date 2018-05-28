@@ -1,7 +1,6 @@
 package com.example.larla.larla.utils;
 
 import android.app.DownloadManager;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,8 +9,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
-
-import org.matrix.androidsdk.rest.model.message.AudioMessage;
 
 import java.io.File;
 

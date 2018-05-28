@@ -4,12 +4,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -18,39 +15,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.example.larla.larla.Matrix;
 import com.example.larla.larla.R;
 import com.example.larla.larla.fragments.LarlaMessageListFragment;
-import com.example.larla.larla.models.Author;
-import com.example.larla.larla.models.Message;
 import com.stfalcon.chatkit.messages.MessageInput;
-import com.stfalcon.chatkit.messages.MessagesList;
-import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.data.RoomMediaMessage;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
-import org.matrix.androidsdk.rest.callback.ToastErrorHandler;
 import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.rest.model.message.LocationMessage;
-import org.matrix.androidsdk.rest.model.sync.RoomResponse;
-import org.matrix.androidsdk.util.ContentUtils;
-import org.matrix.androidsdk.util.EventUtils;
-import org.matrix.androidsdk.util.JsonUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 import static com.example.larla.larla.activity.MainActivity.hasPermissions;
 
-public class ChatKitActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE = 100;
     private static final int REQUEST_VIDEO = 101;
@@ -64,14 +46,10 @@ public class ChatKitActivity extends AppCompatActivity {
     private LarlaMessageListFragment fragment;
     private File destination;
 
-
-
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.chat_kit_activity);
+        setContentView(R.layout.activity_chat);
 
         // Check permissions
         int PERMISSION_ALL = 1;
@@ -137,7 +115,7 @@ public class ChatKitActivity extends AppCompatActivity {
                                                                     "Video from gallery",
                                                                     "Record an audio",
                                                                     "Select location",};
-                AlertDialog.Builder builder = new AlertDialog.Builder(ChatKitActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
                 builder.setTitle("Select attachment");
                 AlertDialog.Builder builder1 = builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
@@ -176,11 +154,11 @@ public class ChatKitActivity extends AppCompatActivity {
                                 startActivityForResult(Intent.createChooser(galleryVideoIntent, "Select picture"), REQUEST_VIDEO_GALLERY);
                                 break;
                             case 4: // Audio
-                                Intent audioIntent = new Intent(ChatKitActivity.this, AudioActivity.class);
+                                Intent audioIntent = new Intent(ChatActivity.this, AudioActivity.class);
                                 startActivityForResult(audioIntent, REQUEST_AUDIO);
                             break;
                             case 5: // Location
-                                Intent mapsIntent = new Intent(ChatKitActivity.this, MapsActivity.class);
+                                Intent mapsIntent = new Intent(ChatActivity.this, MapsActivity.class);
                                 startActivityForResult(mapsIntent, REQUEST_LOCATION);
                             break;
                         }
@@ -259,14 +237,9 @@ public class ChatKitActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_room_info) {
-            Intent roomInfoIntent = new Intent(ChatKitActivity.this, RoomInfoActivity.class);
+            Intent roomInfoIntent = new Intent(ChatActivity.this, RoomInfoActivity.class);
             roomInfoIntent.putExtra("roomId", roomId);
             startActivity(roomInfoIntent);
-            return true;
-        }
-        else if (id == R.id.action_sip_call) {
-            Intent sipCallIntent = new Intent(ChatKitActivity.this, SipCallActivity.class);
-            startActivity(sipCallIntent);
             return true;
         }
 

@@ -45,12 +45,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.MapsActivity" />
-        <activity android:name=".activity.ChatKitActivity" />
+        <activity android:name=".activity.ChatActivity" />
         <activity android:name=".activity.AudioActivity" />
         <activity android:name=".activity.UserInfoActivity" />
         <activity android:name=".activity.NewChatActivity" />
         <activity android:name=".activity.RoomInfoActivity" />
-        <activity android:name=".activity.WalkieTalkieActivity" />
         <activity android:name=".activity.SipCallActivity" />
         <activity android:name=".activity.SipSettingsActivity" />
 
@@ -65,9 +64,9 @@
         <receiver android:name=".sip.IncomingCallReceiver" android:label="Call Receiver" />
 
 
-        <receiver android:name=".NotificationAlarm"/>
+        <receiver android:name=".notifications.NotificationAlarm"/>
         <service
-            android:name=".NotificationService"
+            android:name=".notifications.NotificationService"
             android:exported="false"/>
 
     </application>
