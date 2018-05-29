@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.example.larla.larla.R;
 
-public class NewChatActivity extends AppCompatActivity {
+public class NewChatActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

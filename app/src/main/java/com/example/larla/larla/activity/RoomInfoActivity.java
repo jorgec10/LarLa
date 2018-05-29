@@ -23,7 +23,7 @@ import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.model.RoomMember;
 
-public class RoomInfoActivity extends AppCompatActivity {
+public class RoomInfoActivity extends BaseActivity {
 
     private MXSession session;
     private String roomId;

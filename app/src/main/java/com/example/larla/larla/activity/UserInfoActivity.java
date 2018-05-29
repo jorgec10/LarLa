@@ -11,7 +11,7 @@ import com.example.larla.larla.R;
 
 import org.matrix.androidsdk.MXSession;
 
-public class UserInfoActivity extends AppCompatActivity {
+public class UserInfoActivity extends BaseActivity {
 
     MXSession session;
     String userId;

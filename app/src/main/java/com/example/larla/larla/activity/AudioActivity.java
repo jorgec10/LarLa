@@ -18,7 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class AudioActivity extends AppCompatActivity {
+public class AudioActivity extends BaseActivity {
     private Button play, stop, record, upload;
     private MediaRecorder myAudioRecorder;
     private String outputFile;

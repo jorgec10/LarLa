@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
 
 import static com.example.larla.larla.activity.MainActivity.hasPermissions;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends BaseActivity {
 
     private static final int REQUEST_IMAGE = 100;
     private static final int REQUEST_VIDEO = 101;

@@ -21,6 +21,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.net.sip.*;
 import android.util.Log;
 
@@ -32,7 +35,7 @@ public class IncomingCallReceiver extends BroadcastReceiver {
      * @param intent The intent being received.
      */
     @Override
-    public void onReceive(final Context context, Intent intent) {
+    public void onReceive(final Context context, final Intent intent) {
         Log.d("Call", "onReceive...");
 
         try {
@@ -49,6 +52,10 @@ public class IncomingCallReceiver extends BroadcastReceiver {
             };
             Log.d("Call", "receiving...");
 
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            final Ringtone ringtone = RingtoneManager.getRingtone(context, notification);
+            ringtone.play();
+
             final SipAudioCall incomingCall = LarlaSipManager.getInstance(context).getManager().takeAudioCall(intent, listener);
 
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
@@ -57,6 +64,8 @@ public class IncomingCallReceiver extends BroadcastReceiver {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     try {
+                        LarlaSipManager.getInstance(context).setCall(incomingCall);
+
                         incomingCall.answerCall(30);
                         incomingCall.startAudio();
                         incomingCall.setSpeakerMode(true);
@@ -64,7 +73,28 @@ public class IncomingCallReceiver extends BroadcastReceiver {
                             incomingCall.toggleMute();
                         }
 
-                        LarlaSipManager.getInstance(context).setCall(incomingCall);
+                        ringtone.stop();
+
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                        dialogBuilder.setTitle(LarlaSipManager.getInstance(context).getManager().getSessionFor(intent).getPeerProfile().getUriString());
+                        dialogBuilder.setNegativeButton("Hang up", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    incomingCall.setSpeakerMode(false);
+                                    incomingCall.endCall();
+                                } catch (SipException e) {
+                                    if (incomingCall != null) {
+                                        incomingCall.close();
+                                    }
+                                }
+                                LarlaSipManager.getInstance(context).setCall(null);
+                                dialog.cancel();
+                            }
+                        });
+
+                        dialogBuilder.show();
+
                     } catch (SipException e) {
                         if (incomingCall != null) {
                             incomingCall.close();
@@ -78,12 +108,17 @@ public class IncomingCallReceiver extends BroadcastReceiver {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     try {
+                        incomingCall.setSpeakerMode(false);
                         incomingCall.endCall();
                     } catch (SipException e) {
                         if (incomingCall != null) {
                             incomingCall.close();
                         }
                     }
+                    ringtone.stop();
+
+                    LarlaSipManager.getInstance(context).setCall(null);
+
                     dialog.cancel();
                 }
             });

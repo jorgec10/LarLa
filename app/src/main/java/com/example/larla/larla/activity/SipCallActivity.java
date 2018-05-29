@@ -12,7 +12,7 @@ import com.example.larla.larla.R;
 import com.example.larla.larla.sip.IncomingCallReceiver;
 import com.example.larla.larla.sip.LarlaSipManager;
 
-public class SipCallActivity extends Activity {
+public class SipCallActivity extends BaseActivity {
 
     private String sipAddress;
 
@@ -20,11 +20,6 @@ public class SipCallActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_sip_call);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.SipDemo.INCOMING_CALL");
-        IncomingCallReceiver callReceiver = new IncomingCallReceiver();
-        this.registerReceiver(callReceiver, filter);
 
         Button callButton = findViewById(R.id.buttonCall);
         callButton.setOnClickListener(new View.OnClickListener() {

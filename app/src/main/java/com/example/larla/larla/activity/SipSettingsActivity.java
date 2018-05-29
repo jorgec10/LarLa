@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import com.example.larla.larla.sip.LarlaSipManager;
 
-public class SipSettingsActivity extends AppCompatActivity {
+public class SipSettingsActivity extends BaseActivity {
 
     LarlaSipManager sipManager = LarlaSipManager.getInstance(this);
 
