@@ -41,6 +41,8 @@ public class ChatActivity extends BaseActivity {
     public static final int REQUEST_IMAGE_GALLERY = 104;
     public static final int REQUEST_VIDEO_GALLERY = 105;
 
+    public static final String larlaMessagesFragmentTAG = "com.example.larla.MESSAGESFRAGMENT";
+
     MXSession session;
     String roomId;
     private LarlaMessageListFragment fragment;
@@ -74,12 +76,12 @@ public class ChatActivity extends BaseActivity {
         setTitle(this.getIntent().getStringExtra("roomName"));
 
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-        fragment = (LarlaMessageListFragment) fm.findFragmentByTag("FRAGMENT");
+        fragment = (LarlaMessageListFragment) fm.findFragmentByTag(larlaMessagesFragmentTAG);
 
         if (fragment == null) {
             // this fragment displays messages and handles all message logic
             fragment = LarlaMessageListFragment.newInstance(session.getMyUserId(), roomId, org.matrix.androidsdk.R.layout.fragment_matrix_message_list_fragment);
-            fm.beginTransaction().add(R.id.chat_view, fragment, "FRAGMENT").commit();
+            fm.beginTransaction().add(R.id.chat_view, fragment, larlaMessagesFragmentTAG).commit();
         }
 
         // User messages input
@@ -89,6 +91,7 @@ public class ChatActivity extends BaseActivity {
             public boolean onSubmit(CharSequence input) {
                 //validate and send message
                 session.getDataHandler().getRoom(roomId).sendTextMessage(input.toString(), null, null, null);
+                //fragment.sendTextMessage(input.toString(), null, null);
                 return true;
             }
         });

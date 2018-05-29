@@ -15,13 +15,6 @@ import java.util.List;
 
 public class LarlaMessageListFragment extends MatrixMessageListFragment {
 
-    @Override
-    public void onReceiptEvent(List<String> senderIds) {
-        for (String id : senderIds) {
-            Log.d("ReceiptEvent", getSession().getDataHandler().getUser(id).displayname);
-        }
-    }
-
     public static LarlaMessageListFragment newInstance(String matrixId, String roomId, int layoutResId) {
         LarlaMessageListFragment f = new LarlaMessageListFragment();
         Bundle args = new Bundle();
@@ -47,6 +40,5 @@ public class LarlaMessageListFragment extends MatrixMessageListFragment {
 
         return new LarlaMessagesAdapter(getSession(), getContext());
     }
-
 
 }

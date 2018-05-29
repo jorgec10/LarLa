@@ -63,7 +63,6 @@
 
         <receiver android:name=".sip.IncomingCallReceiver" android:label="Call Receiver" />
 
-
         <receiver android:name=".notifications.NotificationAlarm"/>
         <service
             android:name=".notifications.NotificationService"
