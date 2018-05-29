@@ -335,6 +335,7 @@ public class LarlaMessagesAdapter extends AbstractMessagesAdapter {
         View view = getTextView(position, convertView, parent);
 
         TextView infoTextField = (TextView) view.findViewById(R.id.text_message_body);
+        infoTextField.setText("\uD83D\uDDFA️" + infoTextField.getText());
 
         infoTextField.setOnClickListener(new View.OnClickListener() {
             @Override
